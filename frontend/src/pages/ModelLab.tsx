@@ -1,7 +1,7 @@
 import { FlaskConical, Play, Square } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { useCancelExperiment, useChannels, useCreateExperiment, useExperiment, useExperiments, useMethods, useSystem } from "../api/hooks";
+import { useCancelExperiment, useChannels, useCreateExperiment, useExperiment, useExperiments, useInvalidateOnFinish, useMethods, useSystem } from "../api/hooks";
 import type { EpochLog } from "../api/types";
 import { Plot, axis, baseLayout } from "../components/Plot";
 import { Button, EmptyState, ErrorState, KV, Legend, Loading, Notice, PageHeader, Panel, Segmented, Select, StatusBadge } from "../components/ui";
@@ -120,6 +120,7 @@ export default function ModelLab() {
   }, [exps.data, watchId]);
 
   const watched = useExperiment(watchId, true);
+  useInvalidateOnFinish(watched.data?.status);
   const active = !!watched.data && ["queued", "running"].includes(watched.data.status);
   const live = useEpochStream(watchId, active);
   const [viewChan, setViewChan] = useState<string | null>(null);

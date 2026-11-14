@@ -68,11 +68,14 @@ class JobManager:
 
     # ---------------------------------------------------------------- lifecycle
     def start(self) -> None:
+        # Recovery runs on every application start; experiments active in this process are skipped.
+        self._recover_interrupted()
         if self.started:
             return
         if self.queue is None:
             self.queue = self.mpctx.Queue()
-        self._recover_interrupted()
+        self._stop.clear()
+        self._threads = []
         for target in (self._scheduler_loop, self._consumer_loop):
             t = threading.Thread(target=target, daemon=True)
             t.start()
@@ -92,7 +95,11 @@ class JobManager:
 
     def _recover_interrupted(self) -> None:
         with session_scope() as db:
+            with self.lock:
+                active = set(self.active)
             for exp in db.scalars(select(Experiment).where(Experiment.status == "running")):
+                if exp.id in active:
+                    continue
                 exp.status = "failed"
                 exp.message = "Interrupted: the backend stopped while this experiment was running."
                 exp.finished_at = datetime.now(timezone.utc)

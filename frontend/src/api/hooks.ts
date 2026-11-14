@@ -1,4 +1,5 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 import { api } from "./client";
 import type {
   Channel,
@@ -29,8 +30,9 @@ export const useSystem = () => useQuery({ queryKey: ["system"], queryFn: () => a
 export const useMethods = () =>
   useQuery({ queryKey: ["methods"], queryFn: () => api.get<MethodsResponse>("/methods"), staleTime: Infinity });
 
+// Channels carry their trained runs, so always revalidate on mount (training may have just finished).
 export const useChannels = () =>
-  useQuery({ queryKey: ["channels"], queryFn: () => api.get<Channel[]>("/channels"), staleTime: 15_000 });
+  useQuery({ queryKey: ["channels"], queryFn: () => api.get<Channel[]>("/channels"), staleTime: 0, placeholderData: keepPreviousData });
 
 export const useTelemetry = (chan: string | null, split: "train" | "test", maxPoints?: number) =>
   useQuery({
@@ -47,6 +49,19 @@ export const useExperiments = (poll = true) =>
     queryFn: () => api.get<Experiment[]>("/experiments"),
     refetchInterval: poll ? 4000 : false,
   });
+
+/** Invalidate everything derived from experiment results once a run reaches a final state. */
+export function useInvalidateOnFinish(status: string | undefined) {
+  const qc = useQueryClient();
+  const prev = useRef(status);
+  useEffect(() => {
+    const was = prev.current;
+    prev.current = status;
+    if (was && ["queued", "running"].includes(was) && status && !["queued", "running"].includes(status)) {
+      for (const k of ["channels", "overview", "detections", "experiments", "compare"]) qc.invalidateQueries({ queryKey: [k] });
+    }
+  }, [status, qc]);
+}
 
 export const useExperiment = (id: number | null, poll = false) =>
   useQuery({
