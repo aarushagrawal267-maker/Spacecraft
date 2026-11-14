@@ -55,7 +55,7 @@ foreach ($c in $candidates) {
     try {
         $exe = $c[0]
         $pre = @()
-        if ($c.Length -gt 1) { $pre = $c[1..($c.Length - 1)] }
+        if ($c.Length -gt 1) { $pre = @($c[1..($c.Length - 1)]) }
         $out = & $exe @pre -c "import sys, struct; print('%d.%d %d' % (sys.version_info[0], sys.version_info[1], struct.calcsize('P') * 8))" 2>$null
         if ($LASTEXITCODE -eq 0 -and $out) {
             $parts = $out.Trim().Split(" ")

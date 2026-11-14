@@ -98,7 +98,7 @@ export default function DatasetExplorer() {
           <div className="grid gap-8 lg:grid-cols-2">
             <div>
               <KV k="Telemetry source" v={snap.provenance.source_title ?? snap.source} mono={false} />
-              <KV k="Source location" v={<a href={snap.source_url} target="_blank" rel="noreferrer" className="text-accent hover:underline">{snap.source_url.replace("https://", "")}</a>} mono={false} />
+              <KV k="Source location" v={<a href={snap.source_url} target="_blank" rel="noreferrer" title={snap.source_url} className="break-all text-accent hover:underline">{snap.source_url.replace("https://", "")}</a>} mono={false} />
               <KV k="Retrieved" v={fmtDate(snap.retrieved_at)} mono={false} />
               <KV k="Labels" v={<a href={snap.provenance.labels_url ?? "#"} className="text-accent hover:underline" target="_blank" rel="noreferrer">official Telemanom labeled_anomalies.csv</a>} mono={false} />
               <KV k="Labels SHA-256" v={snap.labels_sha256.slice(0, 24) + "…"} />
