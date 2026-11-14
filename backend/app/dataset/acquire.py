@@ -52,12 +52,30 @@ def sha256_file(path: Path) -> str:
     return h.hexdigest()
 
 
-def _download(url: str, dest: Path, timeout: float = 60.0, retries: int = 3) -> None:
+def _kaggle_auth_header() -> dict:
+    """Optional Kaggle credentials (env vars or ~/.kaggle/kaggle.json). Public datasets
+    usually download without them; credentials help if Kaggle requires sign-in."""
+    import base64
+
+    user, key = os.environ.get("KAGGLE_USERNAME"), os.environ.get("KAGGLE_KEY")
+    cfg = Path.home() / ".kaggle" / "kaggle.json"
+    if not (user and key) and cfg.exists():
+        try:
+            d = json.loads(cfg.read_text())
+            user, key = d.get("username"), d.get("key")
+        except Exception:  # noqa: BLE001
+            pass
+    if user and key:
+        return {"Authorization": "Basic " + base64.b64encode(f"{user}:{key}".encode()).decode()}
+    return {}
+
+
+def _download(url: str, dest: Path, timeout: float = 60.0, retries: int = 3, headers: dict | None = None) -> None:
     dest.parent.mkdir(parents=True, exist_ok=True)
     last_err: Exception | None = None
     for attempt in range(retries):
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+            req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, **(headers or {})})
             with urllib.request.urlopen(req, timeout=timeout) as resp, dest.open("wb") as out:
                 shutil.copyfileobj(resp, out, length=1 << 20)
             return
@@ -92,7 +110,7 @@ def _safe_extract_npy(zip_path: Path, staging: Path) -> int:
 def _from_kaggle(staging: Path, labels: LabelFile, progress: ProgressFn) -> None:
     progress("Downloading archive from Kaggle", 0.1)
     zip_path = staging / "kaggle.zip"
-    _download(sources.KAGGLE_URL, zip_path, timeout=300)
+    _download(sources.KAGGLE_URL, zip_path, timeout=300, retries=2, headers=_kaggle_auth_header())
     progress("Extracting archive", 0.6)
     n = _safe_extract_npy(zip_path, staging)
     zip_path.unlink(missing_ok=True)
