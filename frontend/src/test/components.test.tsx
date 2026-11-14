@@ -95,7 +95,7 @@ describe("TraceStack", () => {
   it("omits the score track when no scores are supplied (telemetry-only view)", () => {
     captured.length = 0;
     render(<TraceStack actual={[1, 2, 3]} labels={[]} showError={false} />);
-    const names = (captured.at(-1)!.data as { name?: string }[]).map((d) => d.name);
+    const names = (captured.at(-1)!.data as { name?: string }[]).map((d) => d.name).filter((n) => n !== "lane-anchor");
     expect(names).toEqual(["Actual telemetry"]);
   });
 });

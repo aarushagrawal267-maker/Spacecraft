@@ -265,7 +265,10 @@ export default function Monitor() {
                 <KV k="Intervals flagged" v={intervals.length} />
                 <KV k="Threshold window" v={session ? `${session.window_batches ?? "—"} × ${session.batch_size ?? "—"} pts` : "—"} />
                 <p className="mt-3 text-[11.5px] leading-relaxed text-dim">
-                  A window is evaluated once {session?.batch_size ?? 70} new points have arrived, so verdicts lag the newest reading by up to one batch. Points before index 250 are not scored.
+                  {session && session.window_batches && session.batch_size
+                    ? `The first verdict needs one full threshold window (${session.window_batches} × ${session.batch_size} = ${fmtInt(session.window_batches * session.batch_size)} scored points, i.e. up to index ${fmtInt(session.eval_start + session.window_batches * session.batch_size)}). After that a window is evaluated every ${session.batch_size} new points, so verdicts lag the newest reading by up to one batch.`
+                    : "Verdicts are issued once each threshold window is complete."}{" "}
+                  Points before index {session?.eval_start ?? 250} are not scored.
                 </p>
               </Panel>
               <Panel eyebrow="Event log" title="Model flags">

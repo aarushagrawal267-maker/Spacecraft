@@ -29,6 +29,12 @@ All figures returned by this API come from the installed dataset and stored expe
 async def lifespan(app: FastAPI):
     settings = get_settings()
     settings.ensure_dirs()
+    try:
+        import torch
+
+        torch.set_num_threads(max(1, settings.api_torch_threads))
+    except Exception:  # noqa: BLE001
+        log.exception("Could not set torch threads")
     migrate()
     from app.services import dataset_service, reference_service
 
