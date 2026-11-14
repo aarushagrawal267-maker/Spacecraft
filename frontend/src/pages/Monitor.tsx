@@ -32,6 +32,8 @@ export default function Monitor() {
   const [session, setSession] = useState<ReplaySession | null>(null);
   const [error, setError] = useState<unknown>(null);
   const [playing, setPlaying] = useState(false);
+  const [everPlayed, setEverPlayed] = useState(false);
+  useEffect(() => { if (playing) setEverPlayed(true); }, [playing]);
   const [speed, setSpeed] = useState("80");
   const [cursor, setCursor] = useState(0);
   const [done, setDone] = useState(false);
@@ -54,6 +56,7 @@ export default function Monitor() {
       setSession(s);
       setBufs({ actual: empty(), prediction: empty(), raw: empty(), smoothed: empty(), thrHi: empty(), thrLo: empty() });
       setCursor(0);
+      setEverPlayed(false);
       setDone(false);
       setIntervals([]);
       setVerdictTo(0);
@@ -190,7 +193,7 @@ export default function Monitor() {
                       </Button>
                     ) : (
                       <Button variant="primary" disabled={done} onClick={() => setPlaying(true)}>
-                        <Play size={14} /> {cursor > 0 ? "Resume" : "Start"}
+                        <Play size={14} /> {cursor > 0 || everPlayed ? "Resume" : "Start"}
                       </Button>
                     )}
                   </>
