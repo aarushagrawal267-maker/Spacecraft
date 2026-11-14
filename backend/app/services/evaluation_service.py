@@ -6,6 +6,7 @@ from pathlib import Path
 
 import numpy as np
 
+from app.core.config import resolve_path
 from app.dataset import store
 from app.db.models import ChannelRun
 from app.ml.evaluation.metrics import aggregate, clip_labels, intervals_to_mask, score_curves
@@ -19,9 +20,9 @@ def _pooled_curves(runs: list[ChannelRun]) -> dict | None:
     """
     scores, masks = [], []
     for r in runs:
-        if not r.arrays_path or not Path(r.arrays_path).exists():
+        if not r.arrays_path or not resolve_path(r.arrays_path).exists():
             continue
-        with np.load(r.arrays_path) as a:
+        with np.load(resolve_path(r.arrays_path)) as a:
             es = int(a["eval_start"])
             s = a["smoothed"][es:].astype(np.float64)
         if not np.isfinite(s).any():
