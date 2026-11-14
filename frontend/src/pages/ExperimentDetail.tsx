@@ -2,7 +2,7 @@ import { Download, Square } from "lucide-react";
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { exportUrl } from "../api/client";
-import { useCancelExperiment, useExperiment, useRun } from "../api/hooks";
+import { useCancelExperiment, useExperiment, useInvalidateOnFinish, useRun } from "../api/hooks";
 import { Button, ErrorState, KV, Loading, Notice, OriginTag, PageHeader, Panel, StatusBadge } from "../components/ui";
 import { fmtDate, fmtDuration, fmtNum, fmtPct } from "../lib/format";
 import { METHOD_COLOR } from "../lib/palette";
@@ -11,6 +11,7 @@ import { LossChart } from "./ModelLab";
 export default function ExperimentDetail() {
   const id = Number(useParams().id);
   const exp = useExperiment(id, true);
+  useInvalidateOnFinish(exp.data?.status);
   const cancel = useCancelExperiment();
   const [runId, setRunId] = useState<number | null>(null);
   const run = useRun(runId);

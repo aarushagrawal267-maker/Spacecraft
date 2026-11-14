@@ -34,6 +34,11 @@ The app distinguishes:
 * A one-step forecaster can adapt to slow drift and miss it; very short training splits (312 points
   for `D-12`) give weak models.
 * The autoencoder may learn to reconstruct anomalies present in the training split.
+* The dynamic threshold adapts to the recent error level. For a **sustained** anomaly (e.g. the
+  long drift on channel `D-3`, labelled 5225–8500), only the onset is flagged (5360–5989); once the
+  large errors fill the 2,100-point window, the threshold rises with them and the rest of the
+  interval is not flagged. Event-wise metrics count this as a detection; point-wise metrics show it
+  as partial coverage.
 * NDT has hand-set constants (window, buffer, p, guards) inherited from Telemanom; using published
   defaults on the same benchmark is itself mild indirect tuning.
 * The interval score is a margin, not a probability; no calibrated confidence is shown.
