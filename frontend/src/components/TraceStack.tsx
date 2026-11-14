@@ -115,6 +115,11 @@ export function TraceStack({
 
     // Annotation lane: horizontal bars, labels hatched (texture = secondary encoding).
     const laneY = hasErr ? "y3" : "y2";
+    // Invisible anchor so the lane axis exists even before any label/detection is shown.
+    data.push({
+      type: "scatter", mode: "markers", x: [xOffset, xOffset], y: ["Expert label", "Model detection"], yaxis: laneY,
+      marker: { opacity: 0 }, hoverinfo: "skip", showlegend: false, name: "lane-anchor",
+    } as Data);
     if (labels.length) {
       data.push({
         type: "bar",
@@ -212,7 +217,8 @@ export function TraceStack({
       yaxis: axis({ domain: domains.y, title: { text: "Telemetry (scaled)", font: { size: 11, color: C.muted } } }) as Layout["yaxis"],
       yaxis2: hasErr
         ? (axis({ domain: domains.y2, ...(scoreMax ? { range: [0, scoreMax] } : { rangemode: "tozero" }), title: { text: "Score", font: { size: 11, color: C.muted } } }) as Layout["yaxis"])
-        : (axis({ domain: domains.y2, type: "category", showgrid: false, tickfont: { size: 10.5, color: C.muted } }) as Layout["yaxis"]),
+        : (axis({ domain: domains.y2, type: "category", showgrid: false, tickfont: { size: 10.5, color: C.muted },
+            categoryorder: "array", categoryarray: ["Expert label", "Model detection"] }) as Layout["yaxis"]),
       ...(hasErr
         ? { yaxis3: axis({ domain: domains.y3, type: "category", showgrid: false, tickfont: { size: 10.5, color: C.muted },
             categoryorder: "array", categoryarray: ["Expert label", "Model detection"] }) as Layout["yaxis"] }

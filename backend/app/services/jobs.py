@@ -59,7 +59,7 @@ class ActiveJob:
 class JobManager:
     def __init__(self) -> None:
         self.mpctx = mp.get_context("spawn")
-        self.queue = self.mpctx.Queue()
+        self.queue = None  # created in start(); spawned workers import this module too
         self.active: dict[int, ActiveJob] = {}
         self.lock = threading.RLock()
         self._stop = threading.Event()
@@ -70,6 +70,8 @@ class JobManager:
     def start(self) -> None:
         if self.started:
             return
+        if self.queue is None:
+            self.queue = self.mpctx.Queue()
         self._recover_interrupted()
         for target in (self._scheduler_loop, self._consumer_loop):
             t = threading.Thread(target=target, daemon=True)

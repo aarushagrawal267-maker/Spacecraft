@@ -31,6 +31,9 @@ class Settings(BaseSettings):
     device: Literal["auto", "cpu", "cuda"] = "auto"
     # Number of CPU threads torch may use inside a training job (None = torch default).
     torch_threads: int | None = None
+    # Threads PyTorch may use inside the API process (live inference / replay). One thread
+    # avoids severe oversubscription when training workers are busy on the same CPU.
+    api_torch_threads: int = 1
     # Only one training job runs at a time by default (laptop-friendly).
     max_concurrent_jobs: int = 1
 
