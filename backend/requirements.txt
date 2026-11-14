@@ -1,7 +1,7 @@
 # Runtime dependencies for the Heliograph backend.
 # Versions are lower-bounded rather than pinned so that Windows wheels resolve
-# on Python 3.11-3.13. requirements.lock (generated) records the exact versions
-# used for the reference run.
+# on Python 3.11-3.13. The exact Python/PyTorch versions used for each experiment
+# (including the reference run) are stored in the experiment's environment record.
 fastapi>=0.115
 uvicorn[standard]>=0.30
 pydantic>=2.7
