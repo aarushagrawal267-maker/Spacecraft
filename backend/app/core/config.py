@@ -65,3 +65,12 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
+
+
+def resolve_path(p: str | Path | None) -> Path | None:
+    """Stored artifact paths may be absolute or relative to the project root
+    (the committed reference bundle uses relative paths so it is portable)."""
+    if p is None or p == "":
+        return None
+    path = Path(p)
+    return path if path.is_absolute() else get_settings().project_root / path
