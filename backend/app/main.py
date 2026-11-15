@@ -73,7 +73,29 @@ def create_app() -> FastAPI:
     )
     for r in (system.router, dataset.router, experiments.router, analysis.router):
         app.include_router(r, prefix="/api")
+    _mount_frontend(app, settings)
     return app
+
+
+def _mount_frontend(app: FastAPI, settings) -> None:
+    """Serve the built UI from the same origin when frontend/dist exists (single-container deployments)."""
+    from fastapi import HTTPException
+    from fastapi.responses import FileResponse
+    from fastapi.staticfiles import StaticFiles
+
+    dist = settings.project_root / "frontend" / "dist"
+    if os.environ.get("HELIOGRAPH_SERVE_FRONTEND") != "1" or not (dist / "index.html").exists():
+        return
+    app.mount("/assets", StaticFiles(directory=dist / "assets"), name="assets")
+
+    @app.get("/{path:path}", include_in_schema=False)
+    def spa(path: str):
+        if path.startswith("api/"):
+            raise HTTPException(404)
+        f = (dist / path).resolve()
+        if path and f.is_file() and dist.resolve() in f.parents:
+            return FileResponse(f)
+        return FileResponse(dist / "index.html")  # client-side routes
 
 
 app = create_app()
