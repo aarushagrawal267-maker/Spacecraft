@@ -102,6 +102,19 @@ marked **Local**. CPU works everywhere. CUDA is used only if it is available, an
 
 ![Mission Overview](docs/img/overview.png)
 
+### Screenshots
+
+![Mission Overview](docs/screenshots/01-mission-overview.png)
+![Telemetry Explorer](docs/screenshots/02-telemetry-explorer.png)
+![Detection Centre](docs/screenshots/03-detection-centre.png)
+![Telemetry Replay](docs/screenshots/04-telemetry-replay.png)
+![Investigation](docs/screenshots/05-investigation.png)
+![Model Laboratory](docs/screenshots/06-model-laboratory.png)
+![Model Evaluation](docs/screenshots/07-model-evaluation.png)
+![Experiment History](docs/screenshots/08-experiment-history.png)
+![Dataset Explorer](docs/screenshots/09-dataset-explorer.png)
+![Research Docs](docs/screenshots/10-research-docs.png)
+
 ---
 
 ## Reference results
