@@ -19,17 +19,19 @@ full evaluation suite.
 ## Contents
 
 1. [Quick start (Windows)](#quick-start-windows)
-2. [What you can do](#what-you-can-do)
-3. [Reference results](#reference-results)
-4. [The data](#the-data)
-5. [How it works](#how-it-works)
-6. [Project structure](#project-structure)
-7. [Testing](#testing)
-8. [Reproducing the experiments](#reproducing-the-experiments)
-9. [Configuration](#configuration)
-10. [Troubleshooting](#troubleshooting)
-11. [Acceptance status](#acceptance-status)
-12. [Limitations, references and licence](#limitations-references-and-licence)
+2. [Quick start (Linux / macOS)](#quick-start-linux--macos)
+3. [What you can do](#what-you-can-do)
+4. [Reference results](#reference-results)
+5. [The data](#the-data)
+6. [How it works](#how-it-works)
+7. [Project structure](#project-structure)
+8. [Testing](#testing)
+9. [Reproducing the experiments](#reproducing-the-experiments)
+10. [Deployment (Docker / Hugging Face Spaces)](#deployment-docker--hugging-face-spaces)
+11. [Configuration](#configuration)
+12. [Troubleshooting](#troubleshooting)
+13. [Acceptance status](#acceptance-status)
+14. [Limitations, references and licence](#limitations-references-and-licence)
 
 ---
 
@@ -82,6 +84,21 @@ Nothing trains automatically. On first start, the database imports the **referen
 `reference/`, so every page shows genuine results right away (marked **Reference**). Your own runs are
 marked **Local**. CPU works everywhere. CUDA is used only if it is available, and you can force CPU with
 `.\start.ps1 -Device cpu`.
+
+---
+
+## Quick start (Linux / macOS)
+
+Prerequisites: Python 3.11–3.13, Node.js 18+, `curl`, about 3 GB of free disk space. From the project folder:
+
+```bash
+./setup.sh            # venv + CPU PyTorch, UI build, NASA dataset download, database (add --cuda for an NVIDIA GPU)
+./start.sh            # backend on http://localhost:8000, UI on http://localhost:5173 — Ctrl+C stops both
+```
+
+`./start.sh --single` runs one process instead: FastAPI serves both the API and the built UI on
+<http://localhost:8000> (API documentation then lives at `/api/docs`). `./start.sh --dev` starts the UI with
+hot reload. Ports can be changed with `API_PORT=... UI_PORT=... ./start.sh`.
 
 ---
 
@@ -213,6 +230,8 @@ Vitest · Playwright.
 ```
 Spacecraft/
 ├── setup.ps1 / start.ps1 / stop.ps1     Windows setup, start and stop
+├── setup.sh / start.sh                  Linux / macOS setup and start
+├── deploy/huggingface/                  Dockerfile + Space card for a single-container deployment
 ├── backend/
 │   ├── app/
 │   │   ├── api/          FastAPI routers (system, dataset, experiments, analysis)
@@ -246,6 +265,8 @@ the real dataset and a throwaway database):
 cd backend; .\.venv\Scripts\python -m pytest; cd ..
 ```
 
+On Linux / macOS: `cd backend && .venv/bin/python -m pytest`.
+
 Frontend component tests:
 
 ```powershell
@@ -272,6 +293,25 @@ backend\.venv\Scripts\python scripts\results_table.py
 the application's own job system. Every experiment stores its configuration, seed, code commit, dataset
 checksum, device and timings. The LSTM steps take hours on a laptop CPU. Exact numbers can differ slightly
 across platforms and PyTorch builds.
+
+---
+
+## Deployment (Docker / Hugging Face Spaces)
+
+`deploy/huggingface/Dockerfile` builds one CPU container in which FastAPI serves the API and the built UI on
+port 7860. The image downloads and verifies the benchmark and imports the reference results at build time.
+
+Run it locally (from the project root, with Docker installed):
+
+```bash
+docker build -f deploy/huggingface/Dockerfile -t heliograph .
+docker run --rm -p 7860:7860 heliograph      # then open http://localhost:7860  (API docs: /api/docs)
+```
+
+To publish it as a free Hugging Face Space: create a Space with the **Docker** SDK, push this repository to
+it, and place `deploy/huggingface/Dockerfile` and `deploy/huggingface/README.md` (the Space card) at the root
+of the Space repository. A free CPU Space restarts when idle, so experiments trained there are not kept; the
+reference results are always available.
 
 ---
 
@@ -326,7 +366,7 @@ could not be executed in the build environment.
 | 11 | Evaluation metrics are calculated from real results | PASS | Metric code unit-tested against hand-computed cases; the results table is generated from the database |
 | 12 | The dashboard displays actual application data | PASS | All overview figures come from SQL queries; a fresh database shows "No models evaluated yet" (asserted in Playwright) |
 | 13 | Experiment history is saved | PASS | SQLite persistence test across a backend restart, including recovery of interrupted jobs; reference bundle imported into a fresh database |
-| 14 | Important features pass automated tests | PASS | 38 pytest (23 unit, 15 integration on real data), 8 Vitest, 6 Playwright end-to-end — all passing |
+| 14 | Important features pass automated tests | PASS | 41 pytest (26 unit, 15 integration on real data), 8 Vitest, 6 Playwright end-to-end — all passing |
 | 15 | No critical runtime errors | PASS (Linux) | 567/567 reference channel runs succeeded; no browser console errors on any page |
 | 16 | Documentation explains how to run and reproduce | PASS | This README plus `docs/` (dataset, methodology, architecture, limitations, references) and the in-app Research page |
 
@@ -354,5 +394,6 @@ could not be executed in the build environment.
 
 * Limitations and interpretation: [docs/limitations.md](docs/limitations.md)
 * References: [docs/references.md](docs/references.md)
+* Code licence: [MIT](LICENSE).
 * Dataset licensing: Telemanom (Caltech/JPL copyright; README states Apache 2.0); the mirror used is BSD 3-Clause.
   The telemetry is not stored in this repository; it is downloaded during setup.

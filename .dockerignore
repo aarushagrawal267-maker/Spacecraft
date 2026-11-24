@@ -1,0 +1,15 @@
+# Keep local environments, data and build outputs out of the Docker build context
+# (the image installs its own dependencies and downloads the benchmark itself).
+.git
+**/__pycache__
+**/*.py[cod]
+**/.pytest_cache
+backend/.venv
+frontend/node_modules
+frontend/dist
+frontend/test-results
+frontend/playwright-report
+data
+artifacts
+logs
+.run
