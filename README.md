@@ -231,7 +231,7 @@ Vitest · Playwright.
 Spacecraft/
 ├── setup.ps1 / start.ps1 / stop.ps1     Windows setup, start and stop
 ├── setup.sh / start.sh                  Linux / macOS setup and start
-├── deploy/huggingface/                  Dockerfile + Space card for a single-container deployment
+├── deploy/huggingface/                  Dockerfile, Space card and publish.py (upload to a Hugging Face Space)
 ├── backend/
 │   ├── app/
 │   │   ├── api/          FastAPI routers (system, dataset, experiments, analysis)
@@ -308,10 +308,22 @@ docker build -f deploy/huggingface/Dockerfile -t heliograph .
 docker run --rm -p 7860:7860 heliograph      # then open http://localhost:7860  (API docs: /api/docs)
 ```
 
-To publish it as a free Hugging Face Space: create a Space with the **Docker** SDK, push this repository to
-it, and place `deploy/huggingface/Dockerfile` and `deploy/huggingface/README.md` (the Space card) at the root
-of the Space repository. A free CPU Space restarts when idle, so experiments trained there are not kept; the
-reference results are always available.
+To publish it as a free Hugging Face Space, use the upload script (it needs your own Hugging Face account and a
+token with **write** permission from <https://huggingface.co/settings/tokens>):
+
+```bash
+pip install huggingface_hub
+hf auth login                                                    # paste the write token
+python deploy/huggingface/publish.py --space <your-username>/heliograph --dry-run   # check what will be sent
+python deploy/huggingface/publish.py --space <your-username>/heliograph
+```
+
+The script creates the Space (Docker SDK, free CPU) if needed, puts `deploy/huggingface/Dockerfile` and
+`deploy/huggingface/README.md` (the Space card) at its root, and uploads the project. Use it instead of a plain
+`git push` to the Space: the repository contains about 800 binary files (checkpoints, arrays, screenshots) and the
+Hub rejects binary files pushed with git unless they are stored in Git LFS / Xet; the upload API handles that for
+you. The first build takes about 10-15 minutes. A free CPU Space restarts when idle, so experiments trained there
+are not kept; the reference results are always available.
 
 ---
 
@@ -366,7 +378,7 @@ could not be executed in the build environment.
 | 11 | Evaluation metrics are calculated from real results | PASS | Metric code unit-tested against hand-computed cases; the results table is generated from the database |
 | 12 | The dashboard displays actual application data | PASS | All overview figures come from SQL queries; a fresh database shows "No models evaluated yet" (asserted in Playwright) |
 | 13 | Experiment history is saved | PASS | SQLite persistence test across a backend restart, including recovery of interrupted jobs; reference bundle imported into a fresh database |
-| 14 | Important features pass automated tests | PASS | 41 pytest (26 unit, 15 integration on real data), 8 Vitest, 6 Playwright end-to-end — all passing |
+| 14 | Important features pass automated tests | PASS | 43 pytest (28 unit, 15 integration on real data), 8 Vitest, 6 Playwright end-to-end — all passing |
 | 15 | No critical runtime errors | PASS (Linux) | 567/567 reference channel runs succeeded; no browser console errors on any page |
 | 16 | Documentation explains how to run and reproduce | PASS | This README plus `docs/` (dataset, methodology, architecture, limitations, references) and the in-app Research page |
 

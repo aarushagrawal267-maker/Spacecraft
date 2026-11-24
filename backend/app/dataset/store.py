@@ -31,7 +31,7 @@ def _labels_cached(path: str, mtime: float) -> LabelFile:
 
 def labels() -> LabelFile:
     if not is_available():
-        raise DatasetNotAvailable("Dataset not installed. Run setup.ps1 -DownloadData or POST /api/dataset/acquire.")
+        raise DatasetNotAvailable("Dataset not installed. Run setup.ps1 -DownloadData (Windows), ./setup.sh (Linux/macOS) or POST /api/dataset/acquire.")
     p = dataset_root() / "labeled_anomalies.csv"
     return _labels_cached(str(p), p.stat().st_mtime)
 

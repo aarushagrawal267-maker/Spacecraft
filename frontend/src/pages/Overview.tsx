@@ -201,7 +201,7 @@ export default function Overview() {
           title="The SMAP / MSL benchmark is not installed"
           action={<Link to="/dataset"><Button variant="primary">Open Dataset Explorer</Button></Link>}
         >
-          Run <code className="num">setup.ps1 -DownloadData</code> or start the acquisition from the Dataset Explorer. Nothing is shown
+          Run <code className="num">setup.ps1 -DownloadData</code> (Windows) or <code className="num">./setup.sh</code> (Linux/macOS), or start the acquisition from the Dataset Explorer. Nothing is shown
           until real data is present.
         </EmptyState>
       )}
