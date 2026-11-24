@@ -18,7 +18,7 @@ evaluation against expert labels, and a model laboratory.
 Independent research implementation inspired by Hundman et al. (KDD 2018). Not affiliated with NASA/JPL.
 Detected anomalies are unusual patterns that warrant investigation, not confirmed failures.
 
-Source code: https://github.com/aarushagrawal267-maker/Spacecraft · API docs: `/docs`
+Source code: https://github.com/aarushagrawal267-maker/spacecraft · API docs: `/api/docs`
 
 Note: this free CPU Space restarts when idle; experiments you train here are not kept after a restart.
 The reference results are always available.

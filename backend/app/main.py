@@ -60,13 +60,17 @@ async def lifespan(app: FastAPI):
 
 def create_app() -> FastAPI:
     settings = get_settings()
+    # When FastAPI also serves the UI (single-container deployments), the UI owns /docs
+    # (the "Research & Docs" page), so the interactive API documentation moves under /api.
+    api_docs_prefix = "/api" if _serve_frontend(settings) else ""
     app = FastAPI(
         title="Heliograph API",
         version=__version__,
         description=DESCRIPTION,
         lifespan=lifespan,
-        docs_url="/docs",
-        redoc_url="/redoc",
+        docs_url=f"{api_docs_prefix}/docs",
+        redoc_url=f"{api_docs_prefix}/redoc",
+        openapi_url=f"{api_docs_prefix}/openapi.json",
     )
     app.add_middleware(
         CORSMiddleware, allow_origins=settings.cors_origins, allow_methods=["*"], allow_headers=["*"],
@@ -77,6 +81,11 @@ def create_app() -> FastAPI:
     return app
 
 
+def _serve_frontend(settings) -> bool:
+    dist = settings.project_root / "frontend" / "dist"
+    return os.environ.get("HELIOGRAPH_SERVE_FRONTEND") == "1" and (dist / "index.html").exists()
+
+
 def _mount_frontend(app: FastAPI, settings) -> None:
     """Serve the built UI from the same origin when frontend/dist exists (single-container deployments)."""
     from fastapi import HTTPException
@@ -84,7 +93,7 @@ def _mount_frontend(app: FastAPI, settings) -> None:
     from fastapi.staticfiles import StaticFiles
 
     dist = settings.project_root / "frontend" / "dist"
-    if os.environ.get("HELIOGRAPH_SERVE_FRONTEND") != "1" or not (dist / "index.html").exists():
+    if not _serve_frontend(settings):
         return
     app.mount("/assets", StaticFiles(directory=dist / "assets"), name="assets")
 
