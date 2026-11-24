@@ -182,5 +182,7 @@ def run_infer(run_id: int, req: InferenceRequest, db: Session = Depends(get_db))
         return inf.live_inference(db, run_id, req.threshold)
     except KeyError:
         raise HTTPException(404, "Run not found") from None
+    except inf.InvalidInferenceRequest as exc:
+        raise HTTPException(422, str(exc)) from None
     except inf.InferenceError as exc:
         raise HTTPException(409, str(exc)) from None

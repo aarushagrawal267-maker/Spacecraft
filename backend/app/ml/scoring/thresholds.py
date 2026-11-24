@@ -63,9 +63,48 @@ class ThresholdConfig:
 
     @classmethod
     def from_dict(cls, d: dict | None) -> "ThresholdConfig":
+        """Build a config from user/stored settings; raises ``ValueError`` with a readable
+        message for a wrong type or an out-of-range value (instead of failing deep in NDT)."""
         d = d or {}
         known = {k: v for k, v in d.items() if k in cls.__dataclass_fields__}
-        return cls(**known)
+        cfg = cls(**known)
+        cfg.validate()
+        return cfg
+
+    def validate(self) -> None:
+        def num(name: str, *, integer: bool = False, lo: float | None = None, hi: float | None = None,
+                lo_open: bool = False, hi_open: bool = False) -> None:
+            v = getattr(self, name)
+            if isinstance(v, bool) or not isinstance(v, (int, float, np.integer, np.floating)):
+                raise ValueError(f"threshold '{name}' must be a number, got {v!r}")
+            if not np.isfinite(v) or (integer and float(v) != int(v)):
+                raise ValueError(f"threshold '{name}' must be a finite {'integer' if integer else 'number'}, got {v!r}")
+            if lo is not None and (v <= lo if lo_open else v < lo):
+                raise ValueError(f"threshold '{name}' must be {'>' if lo_open else '>='} {lo}, got {v!r}")
+            if hi is not None and (v >= hi if hi_open else v > hi):
+                raise ValueError(f"threshold '{name}' must be {'<' if hi_open else '<='} {hi}, got {v!r}")
+            setattr(self, name, int(v) if integer else float(v))
+
+        if self.mode not in ("ndt", "static"):
+            raise ValueError(f"threshold 'mode' must be 'ndt' or 'static', got {self.mode!r}")
+        if not isinstance(self.inverse, bool):
+            raise ValueError(f"threshold 'inverse' must be true or false, got {self.inverse!r}")
+        num("batch_size", integer=True, lo=1)
+        num("window_size", integer=True, lo=1)
+        num("smoothing_perc", lo=0, hi=1, lo_open=True)
+        num("error_buffer", integer=True, lo=0)
+        num("p", lo=0, hi=1)
+        num("z_min", lo=0)
+        num("z_max", lo=0)
+        num("z_step", lo=0, lo_open=True)
+        if self.z_max <= self.z_min:
+            raise ValueError("threshold 'z_max' must be greater than 'z_min'")
+        num("max_sequences", integer=True, lo=1)
+        num("max_flag_fraction", lo=0, hi=1, lo_open=True)
+        num("min_error", lo=0)
+        num("guard_fraction", lo=0, hi=1, hi_open=True)
+        num("ignore_initial", integer=True, lo=0)
+        num("static_k", lo=0)
 
     def to_dict(self) -> dict:
         return asdict(self)

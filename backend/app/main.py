@@ -6,12 +6,14 @@ import logging
 import os
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app import __version__
 from app.api import analysis, dataset, experiments, system
 from app.core.config import get_settings
+from app.dataset import store
 from app.db.session import migrate, session_scope
 
 log = logging.getLogger("heliograph")
@@ -77,6 +79,12 @@ def create_app() -> FastAPI:
     )
     for r in (system.router, dataset.router, experiments.router, analysis.router):
         app.include_router(r, prefix="/api")
+
+    @app.exception_handler(store.DatasetNotAvailable)
+    async def _dataset_missing(_request: Request, exc: store.DatasetNotAvailable) -> JSONResponse:
+        # Any endpoint that needs telemetry explains how to install it instead of a bare 500.
+        return JSONResponse(status_code=503, content={"detail": str(exc)})
+
     _mount_frontend(app, settings)
     return app
 
