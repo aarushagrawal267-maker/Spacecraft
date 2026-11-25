@@ -34,3 +34,18 @@ def test_project_files_excludes_local_environments_and_data():
     assert files, "expected at least the tracked project files"
     for f in files:
         assert not set(f.parts) & {".venv", "node_modules", "data", "artifacts", ".git"}, f
+
+
+def test_credential_files_are_never_staged(tmp_path, monkeypatch):
+    publish = _load_publish()
+    for name in (".env", "backend/.env.local", "kaggle.json", "deploy/space.pem", "README.md", "backend/app/main.py"):
+        (tmp_path / name).parent.mkdir(parents=True, exist_ok=True)
+        (tmp_path / name).write_text("x")
+    monkeypatch.setattr(publish, "ROOT", tmp_path)
+    # Without git (e.g. a downloaded zip) the fallback walk is used.
+    monkeypatch.setattr(publish.subprocess, "run", lambda *a, **k: (_ for _ in ()).throw(OSError("no git")))
+
+    picked = {p.as_posix() for p in publish.project_files()}
+
+    assert picked == {"README.md", "backend/app/main.py"}
+    assert publish._is_secret_file(Path(".env.production")) and not publish._is_secret_file(Path("env.py"))

@@ -13,3 +13,13 @@ data
 artifacts
 logs
 .run
+# Credentials must never be baked into an image layer
+**/.env
+**/.env.*
+**/kaggle.json
+**/.netrc
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
+**/venv

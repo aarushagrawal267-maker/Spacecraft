@@ -397,7 +397,7 @@ could not be executed in the build environment.
 | 11 | Evaluation metrics are calculated from real results | PASS | Metric code unit-tested against hand-computed cases; the results table is generated from the database |
 | 12 | The dashboard displays actual application data | PASS | All overview figures come from SQL queries; a fresh database shows "No models evaluated yet" (asserted in Playwright) |
 | 13 | Experiment history is saved | PASS | SQLite persistence test across a backend restart, including recovery of interrupted jobs; reference bundle imported into a fresh database |
-| 14 | Important features pass automated tests | PASS | 60 pytest (42 unit, 18 integration on real data), 8 Vitest, 6 Playwright end-to-end — all passing |
+| 14 | Important features pass automated tests | PASS | 63 pytest (45 unit, 18 integration on real data), 8 Vitest, 6 Playwright end-to-end — all passing |
 | 15 | No critical runtime errors | PASS (Linux) | 567/567 reference channel runs succeeded; no browser console errors on any page |
 | 16 | Documentation explains how to run and reproduce | PASS | This README plus `docs/` (dataset, methodology, architecture, limitations, references) and the in-app Research page |
 

@@ -27,8 +27,16 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
-SKIP_DIRS = {".git", "node_modules", ".venv", "data", "artifacts", "logs", ".run", "dist", "__pycache__",
-             ".pytest_cache", "test-results", "playwright-report"}
+SKIP_DIRS = {".git", "node_modules", ".venv", "venv", "data", "artifacts", "logs", ".run", "dist", "__pycache__",
+             ".pytest_cache", "test-results", "playwright-report", ".kaggle", ".huggingface"}
+# Never upload local credentials to the (usually public) Space, even when git is unavailable.
+SECRET_NAMES = {"kaggle.json", ".netrc", ".pypirc", ".npmrc"}
+SECRET_SUFFIXES = {".pem", ".key", ".p12", ".pfx"}
+
+
+def _is_secret_file(p: Path) -> bool:
+    return (p.name == ".env" or p.name.startswith(".env.") or p.name in SECRET_NAMES
+            or p.suffix in SECRET_SUFFIXES)
 
 
 def project_files() -> list[Path]:
@@ -37,7 +45,7 @@ def project_files() -> list[Path]:
         out = subprocess.run(["git", "ls-files", "-z"], cwd=ROOT, capture_output=True, check=True)
         files = [Path(p) for p in out.stdout.decode().split("\0") if p]
         if files:
-            return [f for f in files if (ROOT / f).is_file()]
+            return [f for f in files if (ROOT / f).is_file() and not _is_secret_file(f)]
     except (OSError, subprocess.CalledProcessError):
         pass
     files = []
@@ -45,7 +53,8 @@ def project_files() -> list[Path]:
         dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS]
         for name in filenames:
             p = Path(dirpath, name).relative_to(ROOT)
-            if p.suffix not in {".pyc", ".log"} and not name.endswith((".db", ".db-wal", ".db-shm")):
+            if (p.suffix not in {".pyc", ".log"} and not name.endswith((".db", ".db-wal", ".db-shm"))
+                    and not _is_secret_file(p)):
                 files.append(p)
     return files
 

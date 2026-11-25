@@ -14,6 +14,7 @@ import os
 import shutil
 import stat
 import time
+import urllib.parse
 import urllib.request
 import zipfile
 from dataclasses import dataclass, field
@@ -70,13 +71,34 @@ def _kaggle_auth_header() -> dict:
     return {}
 
 
+class _StripAuthOnCrossHostRedirect(urllib.request.HTTPRedirectHandler):
+    """urllib copies every request header, including ``Authorization``, onto a redirect.
+
+    Kaggle answers a download with a redirect to a signed storage URL on another host, so the
+    default handler would send the user's Kaggle API key there too. Drop credentials whenever a
+    redirect changes the scheme or host (the same rule ``requests`` and browsers follow).
+    """
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        new = super().redirect_request(req, fp, code, msg, headers, newurl)
+        if new is not None:
+            old_u, new_u = urllib.parse.urlsplit(req.full_url), urllib.parse.urlsplit(new.full_url)
+            if (old_u.scheme, old_u.netloc.lower()) != (new_u.scheme, new_u.netloc.lower()):
+                for name in [k for k in new.headers if k.lower() in ("authorization", "cookie")]:
+                    del new.headers[name]
+        return new
+
+
+_OPENER = urllib.request.build_opener(_StripAuthOnCrossHostRedirect)
+
+
 def _download(url: str, dest: Path, timeout: float = 60.0, retries: int = 3, headers: dict | None = None) -> None:
     dest.parent.mkdir(parents=True, exist_ok=True)
     last_err: Exception | None = None
     for attempt in range(retries):
         try:
             req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, **(headers or {})})
-            with urllib.request.urlopen(req, timeout=timeout) as resp, dest.open("wb") as out:
+            with _OPENER.open(req, timeout=timeout) as resp, dest.open("wb") as out:
                 shutil.copyfileobj(resp, out, length=1 << 20)
             return
         except Exception as exc:  # noqa: BLE001 - network errors vary by platform

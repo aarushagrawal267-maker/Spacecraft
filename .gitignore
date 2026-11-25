@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 .venv/
+venv/
 .pytest_cache/
 *.egg-info/
 
@@ -19,6 +20,23 @@ data/processed/
 data/*.db
 data/*.db-wal
 data/*.db-shm
+# Database files and dumps anywhere (may hold experiment history or personal data)
+*.sqlite
+*.sqlite3
+*.db-journal
+*.sql.gz
+*.dump
+
+# --- Secrets / credentials (never commit; pass them as environment variables) ---
+.env
+.env.*
+!.env.example
+kaggle.json
+.netrc
+*.pem
+*.key
+*.p12
+*.pfx
 
 # --- Generated model outputs (the curated reference bundle lives in reference/) ---
 artifacts/
