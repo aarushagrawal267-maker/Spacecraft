@@ -367,9 +367,9 @@ For low-memory laptops, use the **Quick** profile and a few channels per experim
 | Problem | Fix |
 |---|---|
 | "running scripts is disabled" | `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` |
-| "Port 8000/5173 is already in use" | Run `.\stop.ps1`, or close the other program using the port |
-| Kaggle download fails | Setup falls back to the GitHub copy automatically. Or download the zip from the Kaggle page, save it as `data\incoming\data.zip`, then run `backend\.venv\Scripts\python scripts\acquire_data.py --source manual` |
-| UI shows "Backend unreachable" | Check `logs\backend.err.log`, then restart with `.\stop.ps1` and `.\start.ps1` |
+| "Port 8000/5173 is already in use" | Run `.\stop.ps1` (Linux/macOS: press Ctrl+C in the terminal running `./start.sh`), close the other program using the port, or pick other ports with `API_PORT=... UI_PORT=... ./start.sh` |
+| Kaggle download fails | Setup falls back to the GitHub copy automatically. Or download the zip from the Kaggle page, save it as `data\incoming\data.zip`, then run `backend\.venv\Scripts\python scripts\acquire_data.py --source manual` (Linux/macOS: `data/incoming/data.zip` and `backend/.venv/bin/python scripts/acquire_data.py --source manual`) |
+| UI shows "Backend unreachable" | Check `logs\backend.err.log`, then restart with `.\stop.ps1` and `.\start.ps1` (Linux/macOS: check `logs/backend.err.log`, press Ctrl+C and run `./start.sh` again) |
 | Project in OneDrive | Move it outside OneDrive; syncing can lock the database |
 | CUDA not used | Run `.\setup.ps1 -Cuda` (needs an NVIDIA driver); check the CPU/CUDA badge in the top bar |
 

@@ -20,7 +20,7 @@ function MissionCard({ sc, d }: { sc: "SMAP" | "MSL"; d?: { channels: number; te
         </div>
         <div className="mt-2 text-[20px] font-semibold tracking-tight text-ink">{info.name}</div>
         <p className="mt-1.5 max-w-md text-[13px] leading-relaxed text-muted">{info.blurb}</p>
-        <div className="mt-5 grid grid-cols-4 gap-4">
+        <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
           <Stat label="Channels" value={fmtInt(d?.channels)} />
           <Stat label="Label seq." value={fmtInt(d?.label_sequences)} />
           <Stat label="Train values" value={fmtInt(d?.train_values)} />

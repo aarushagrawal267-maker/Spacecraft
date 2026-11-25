@@ -41,9 +41,9 @@ function ContextBar() {
   const queued = (exps.data ?? []).filter((e) => e.status === "queued").length;
   const backendDown = ds.isError;
   return (
-    <div className="flex h-12 items-center justify-between gap-4 border-b border-hairline bg-void/80 px-6 backdrop-blur">
+    <div className="flex h-12 items-center justify-between gap-4 border-b border-hairline bg-void/80 px-4 backdrop-blur md:px-6">
       <div className="flex min-w-0 items-center gap-5 text-[12px]">
-        <span className="inline-flex items-center gap-2 text-ink-2">
+        <span className="inline-flex items-center gap-2 whitespace-nowrap text-ink-2">
           <span
             className={`h-1.5 w-1.5 rounded-full ${backendDown ? "bg-critical" : ds.data?.available ? "bg-good" : "bg-warn"}`}
             aria-hidden
@@ -65,7 +65,7 @@ function ContextBar() {
           </NavLink>
         )}
         {sys.data && (
-          <span className="inline-flex items-center gap-1.5" title={sys.data.platform}>
+          <span className="inline-flex items-center gap-1.5 whitespace-nowrap" title={sys.data.platform}>
             <Cpu size={13} />
             {sys.data.cuda_available ? `CUDA · ${sys.data.cuda_device}` : `CPU · ${sys.data.cpu_count} cores`}
           </span>
@@ -80,22 +80,23 @@ function ContextBar() {
 
 export function Shell({ children }: { children: ReactNode }) {
   return (
-    <div className="flex h-full">
-      <aside className="flex w-[232px] shrink-0 flex-col border-r border-hairline bg-panel">
-        <div className="px-5 pt-5 pb-6">
+    <div className="flex h-full flex-col md:flex-row">
+      {/* Below the md breakpoint the sidebar becomes a top bar with a horizontally scrolling menu. */}
+      <aside className="flex shrink-0 flex-col border-b border-hairline bg-panel md:w-[232px] md:border-r md:border-b-0">
+        <div className="px-4 pt-3 pb-2 md:px-5 md:pt-5 md:pb-6">
           <Wordmark />
         </div>
-        <nav className="flex-1 overflow-y-auto px-3" aria-label="Main">
+        <nav className="flex gap-1 overflow-x-auto px-3 pb-2 md:block md:flex-1 md:overflow-y-auto md:pb-0" aria-label="Main">
           {NAV.map((g) => (
-            <div key={g.group} className="mb-5">
-              <div className="eyebrow mb-1.5 px-2.5 text-dim">{g.group}</div>
+            <div key={g.group} className="flex shrink-0 gap-1 md:mb-5 md:block">
+              <div className="eyebrow mb-1.5 hidden px-2.5 text-dim md:block">{g.group}</div>
               {g.items.map((it) => (
                 <NavLink
                   key={it.to}
                   to={it.to}
                   end={it.end}
                   className={({ isActive }) =>
-                    `group relative flex items-center gap-2.5 rounded-md px-2.5 py-[7px] text-[13px] transition-colors ${
+                    `group relative flex shrink-0 items-center gap-2.5 whitespace-nowrap rounded-md px-2.5 py-[7px] text-[13px] transition-colors ${
                       isActive ? "bg-raised text-ink" : "text-ink-2 hover:bg-raised/60 hover:text-ink"
                     }`
                   }
@@ -112,7 +113,7 @@ export function Shell({ children }: { children: ReactNode }) {
             </div>
           ))}
         </nav>
-        <div className="border-t border-hairline px-5 py-4 text-[11px] leading-relaxed text-dim">
+        <div className="hidden border-t border-hairline px-5 py-4 text-[11px] leading-relaxed text-dim md:block">
           Inspired by Hundman et al., KDD 2018. Not affiliated with NASA/JPL. Anomalies are patterns that warrant investigation, not
           confirmed failures.
         </div>
@@ -120,7 +121,13 @@ export function Shell({ children }: { children: ReactNode }) {
       <div className="flex min-w-0 flex-1 flex-col">
         <ContextBar />
         <main className="graticule flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-[1440px] px-8 py-7">{children}</div>
+          <div className="mx-auto max-w-[1440px] px-4 py-5 md:px-8 md:py-7">
+            {children}
+            <p className="mt-8 text-[11px] leading-relaxed text-dim md:hidden">
+              Inspired by Hundman et al., KDD 2018. Not affiliated with NASA/JPL. Anomalies are patterns that warrant investigation, not
+              confirmed failures.
+            </p>
+          </div>
         </main>
       </div>
     </div>
