@@ -93,6 +93,47 @@ def test_series_and_live_inference_agree(client, lstm_run):
     assert alt["threshold_config"]["mode"] == "static"
 
 
+def test_inference_rejects_bad_threshold_overrides(client, lstm_run):
+    run_id = next(r["id"] for r in lstm_run["runs"] if r["chan_id"] == "T-9")
+    for bad in ({"p": None}, {"mode": "bogus"}, {"batch_size": 0}, {"mode": "static", "static_k": None}):
+        r = client.post(f"/api/runs/{run_id}/infer", json={"threshold": bad})
+        assert r.status_code == 422, (bad, r.text)
+        assert "threshold" in r.json()["detail"]
+    r = client.post("/api/experiments", json={"method": "persistence", "channels": ["T-9"],
+                                              "threshold": {"error_buffer": -3}})
+    assert r.status_code == 422 and "error_buffer" in r.json()["detail"]
+
+
+def test_corrupt_checkpoint_gives_clear_error(client, lstm_run):
+    from app.core.config import resolve_path
+    from app.db.models import ChannelRun
+    from app.db.session import session_scope
+
+    run = next(r for r in lstm_run["runs"] if r["chan_id"] == "C-2")
+    with session_scope() as db:
+        path = resolve_path(db.get(ChannelRun, run["id"]).model_path)
+    original = path.read_bytes()
+    try:
+        path.write_bytes(b"not a checkpoint")
+        for r in (client.post(f"/api/runs/{run['id']}/infer", json={}),
+                  client.post("/api/replay", json={"run_id": run["id"]})):
+            assert r.status_code == 409, r.text
+            assert "could not be loaded" in r.json()["detail"]
+    finally:
+        path.write_bytes(original)
+    assert client.post(f"/api/runs/{run['id']}/infer", json={}).status_code == 200
+
+
+def test_missing_dataset_gives_clear_error(client, lstm_run, monkeypatch):
+    from app.dataset import store
+
+    run_id = lstm_run["runs"][0]["id"]
+    monkeypatch.setattr(store, "is_available", lambda: False)
+    for r in (client.post(f"/api/runs/{run_id}/infer", json={}), client.get(f"/api/runs/{run_id}/series")):
+        assert r.status_code == 503, r.text
+        assert "setup.sh" in r.json()["detail"]
+
+
 def test_replay_matches_offline(client, lstm_run):
     run_id = next(r["id"] for r in lstm_run["runs"] if r["chan_id"] == "C-2")
     stored = client.get(f"/api/runs/{run_id}/series").json()

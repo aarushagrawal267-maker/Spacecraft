@@ -29,9 +29,15 @@ def _labels_cached(path: str, mtime: float) -> LabelFile:
     return load_label_file(Path(path))
 
 
+NOT_INSTALLED_MSG = (
+    "Dataset not installed. Run setup.ps1 -DownloadData (Windows), ./setup.sh (Linux/macOS) "
+    "or POST /api/dataset/acquire."
+)
+
+
 def labels() -> LabelFile:
     if not is_available():
-        raise DatasetNotAvailable("Dataset not installed. Run setup.ps1 -DownloadData or POST /api/dataset/acquire.")
+        raise DatasetNotAvailable(NOT_INSTALLED_MSG)
     p = dataset_root() / "labeled_anomalies.csv"
     return _labels_cached(str(p), p.stat().st_mtime)
 
@@ -55,7 +61,7 @@ def load_split(chan_id: str, split: str) -> np.ndarray:
     if split not in ("train", "test"):
         raise ValueError(split)
     if not is_available():
-        raise DatasetNotAvailable("Dataset not installed.")
+        raise DatasetNotAvailable(NOT_INSTALLED_MSG)
     p = dataset_root() / split / f"{chan_id}.npy"
     if not p.exists():
         raise KeyError(f"{split}/{chan_id}.npy")

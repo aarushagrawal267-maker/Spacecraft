@@ -20,7 +20,7 @@ function MissionCard({ sc, d }: { sc: "SMAP" | "MSL"; d?: { channels: number; te
         </div>
         <div className="mt-2 text-[20px] font-semibold tracking-tight text-ink">{info.name}</div>
         <p className="mt-1.5 max-w-md text-[13px] leading-relaxed text-muted">{info.blurb}</p>
-        <div className="mt-5 grid grid-cols-4 gap-4">
+        <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
           <Stat label="Channels" value={fmtInt(d?.channels)} />
           <Stat label="Label seq." value={fmtInt(d?.label_sequences)} />
           <Stat label="Train values" value={fmtInt(d?.train_values)} />
@@ -76,6 +76,8 @@ function Leaderboard({ rows }: { rows: Experiment[] }) {
           Event-wise metrics follow the protocol of Hundman et al.; point-wise F1 counts every evaluated timestep without point
           adjustment. Values are computed by this application on test indices ≥ 250 of all 81 channels and are{" "}
           <em>not</em> directly comparable with the paper (different preprocessing details and implementation).
+          With only 104 labelled sequences, event F0.5 carries a 95 % channel-bootstrap interval of roughly ±0.07–0.10 for the
+          stronger methods, and each reference run uses a single seed, so small gaps between methods are not a reliable ranking.
         </p>
       </div>
       <div>
@@ -201,7 +203,7 @@ export default function Overview() {
           title="The SMAP / MSL benchmark is not installed"
           action={<Link to="/dataset"><Button variant="primary">Open Dataset Explorer</Button></Link>}
         >
-          Run <code className="num">setup.ps1 -DownloadData</code> or start the acquisition from the Dataset Explorer. Nothing is shown
+          Run <code className="num">setup.ps1 -DownloadData</code> (Windows) or <code className="num">./setup.sh</code> (Linux/macOS), or start the acquisition from the Dataset Explorer. Nothing is shown
           until real data is present.
         </EmptyState>
       )}

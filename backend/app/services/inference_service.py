@@ -22,6 +22,10 @@ class InferenceError(RuntimeError):
     pass
 
 
+class InvalidInferenceRequest(InferenceError):
+    """The caller sent unusable settings (e.g. an out-of-range threshold override)."""
+
+
 def to_list(a: np.ndarray | None, decimals: int = 5) -> list | None:
     if a is None:
         return None
@@ -45,7 +49,15 @@ def load_fitted(run: ChannelRun, exp: Experiment) -> methods.Fitted:
                 "This run has no saved model file on this machine. Re-run the experiment to train it locally."
             )
     device = resolve_device(get_settings().device)
-    return methods.load(exp.method, exp.config, resolve_path(run.model_path), device, exp.seed)
+    try:
+        return methods.load(exp.method, exp.config, resolve_path(run.model_path), device, exp.seed)
+    except Exception as exc:  # noqa: BLE001 - corrupt/truncated/incompatible checkpoint
+        name = Path(run.model_path).name if run.model_path else "model"
+        reason = (str(exc).strip().splitlines() or [""])[0][:160]
+        raise InferenceError(
+            f"The saved model file {name} could not be loaded ({type(exc).__name__}: {reason}). "
+            "It may be corrupt or from an incompatible version; re-run the experiment to retrain it."
+        ) from exc
 
 
 def stored_series(run: ChannelRun, exp: Experiment) -> dict:
@@ -89,6 +101,10 @@ def series_payload(chan_id, test, arrays: dict, eval_start: int, detections: lis
 def live_inference(db: Session, run_id: int, threshold_overrides: dict | None) -> dict:
     """Execute the stored model on the test stream now, then threshold and evaluate."""
     run, exp = get_run(db, run_id)
+    try:
+        thr = ThresholdConfig.from_dict({**(exp.threshold_config or {}), **(threshold_overrides or {})})
+    except (TypeError, ValueError) as exc:
+        raise InvalidInferenceRequest(str(exc)) from exc
     test = store.load_split(run.chan_id, "test")
     t0 = time.perf_counter()
     fitted = load_fitted(run, exp)
@@ -96,7 +112,6 @@ def live_inference(db: Session, run_id: int, threshold_overrides: dict | None) -
     t1 = time.perf_counter()
     pred, raw = methods.score(fitted, test)
     score_ms = (time.perf_counter() - t1) * 1000
-    thr = ThresholdConfig.from_dict({**(exp.threshold_config or {}), **(threshold_overrides or {})})
     train_raw = methods.score(fitted, store.load_split(run.chan_id, "train"))[1] if thr.mode == "static" else None
     t2 = time.perf_counter()
     det = detect(test[:, 0], raw, thr, methods.EVAL_START, train_raw)

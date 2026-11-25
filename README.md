@@ -19,17 +19,19 @@ full evaluation suite.
 ## Contents
 
 1. [Quick start (Windows)](#quick-start-windows)
-2. [What you can do](#what-you-can-do)
-3. [Reference results](#reference-results)
-4. [The data](#the-data)
-5. [How it works](#how-it-works)
-6. [Project structure](#project-structure)
-7. [Testing](#testing)
-8. [Reproducing the experiments](#reproducing-the-experiments)
-9. [Configuration](#configuration)
-10. [Troubleshooting](#troubleshooting)
-11. [Acceptance status](#acceptance-status)
-12. [Limitations, references and licence](#limitations-references-and-licence)
+2. [Quick start (Linux / macOS)](#quick-start-linux--macos)
+3. [What you can do](#what-you-can-do)
+4. [Reference results](#reference-results)
+5. [The data](#the-data)
+6. [How it works](#how-it-works)
+7. [Project structure](#project-structure)
+8. [Testing](#testing)
+9. [Reproducing the experiments](#reproducing-the-experiments)
+10. [Deployment (Docker / Hugging Face Spaces)](#deployment-docker--hugging-face-spaces)
+11. [Configuration](#configuration)
+12. [Troubleshooting](#troubleshooting)
+13. [Acceptance status](#acceptance-status)
+14. [Limitations, references and licence](#limitations-references-and-licence)
 
 ---
 
@@ -82,6 +84,21 @@ Nothing trains automatically. On first start, the database imports the **referen
 `reference/`, so every page shows genuine results right away (marked **Reference**). Your own runs are
 marked **Local**. CPU works everywhere. CUDA is used only if it is available, and you can force CPU with
 `.\start.ps1 -Device cpu`.
+
+---
+
+## Quick start (Linux / macOS)
+
+Prerequisites: Python 3.11–3.13, Node.js 18+, `curl`, about 3 GB of free disk space. From the project folder:
+
+```bash
+./setup.sh            # venv + CPU PyTorch, UI build, NASA dataset download, database (add --cuda for an NVIDIA GPU)
+./start.sh            # backend on http://localhost:8000, UI on http://localhost:5173 — Ctrl+C stops both
+```
+
+`./start.sh --single` runs one process instead: FastAPI serves both the API and the built UI on
+<http://localhost:8000> (API documentation then lives at `/api/docs`). `./start.sh --dev` starts the UI with
+hot reload. Ports can be changed with `API_PORT=... UI_PORT=... ./start.sh`.
 
 ---
 
@@ -146,16 +163,35 @@ These are the experiments shipped in `reference/` and shown as **Reference** in 
 | Isolation Forest | 0.282 | 0.288 | 0.053 | 0.077 | 13.1% | 4.7% |
 | Random scores (control) | — | 0.000 | — | 0.000 | 0.0% | 0.0% |
 
+"mean AP" is the average precision of the smoothed score computed per channel and averaged over the 81 channels.
 Threshold-free, pooled over channels (each channel's smoothed score standardised): average precision —
-LSTM forecaster 0.414, Ridge AR 0.382, LSTM autoencoder 0.289,
-random control 0.119; ROC AUC — Ridge AR 0.716, LSTM forecaster 0.706,
-LSTM autoencoder 0.608, random control 0.47.
+LSTM forecaster 0.414, Ridge AR 0.382, LSTM autoencoder 0.289, rolling z-score 0.268, persistence 0.265,
+Isolation Forest 0.239, random control 0.119 (the labelled share of evaluated points is 0.130); ROC AUC —
+Ridge AR 0.716, LSTM forecaster 0.706, LSTM autoencoder 0.608, rolling z-score 0.598, Isolation Forest 0.591,
+persistence 0.550, random control 0.470.
+
+Event F0.5 with 95 % channel-bootstrap intervals (81 channels resampled with replacement, 10,000 draws, seed 0; differences are paired against LSTM forecaster):
+
+| Method | Event F0.5 [95 % CI] | LSTM forecaster minus method [95 % CI] |
+|---|---|---|
+| LSTM forecaster | 0.666 [0.595, 0.740] | — |
+| LSTM autoencoder | 0.659 [0.568, 0.743] | +0.007 [-0.089, +0.108] |
+| Ridge autoregression | 0.605 [0.516, 0.697] | +0.061 [-0.035, +0.158] |
+| Persistence forecast | 0.560 [0.464, 0.659] | +0.106 [+0.020, +0.195] |
+| Rolling z-score | 0.554 [0.467, 0.642] | +0.112 [+0.034, +0.190] |
+| Isolation Forest | 0.284 [0.138, 0.415] | +0.382 [+0.223, +0.557] |
+| Random scores (control) | 0.000 [0.000, 0.000] | +0.666 [+0.595, +0.740] |
 
 **Reading these results**
 
-* The **LSTM forecaster** has the best event-wise balance (F0.5) and the best recall on *contextual* anomalies,
+* The **LSTM forecaster** has the highest event-wise F0.5 and the best recall on *contextual* anomalies,
   which is where a non-linear temporal model should help most. It does **not** win everywhere: Ridge
   autoregression matches it on MSL event F0.5 and slightly exceeds it on pooled ROC AUC.
+* **The ranking at the top is not statistically settled.** With only 104 labelled sequences the bootstrap
+  intervals above are about ±0.07–0.10 wide. The LSTM forecaster's lead over the LSTM autoencoder (+0.007) and
+  over Ridge autoregression (+0.061) is inside that noise (both paired intervals include 0); only its margins
+  over persistence, rolling z-score, Isolation Forest and the random control exclude 0. All figures come from a
+  single seed (0); seed-to-seed variation of the neural models was not measured.
 * The **LSTM autoencoder** is the most precise but misses more sequences (low recall).
 * The **random control** produces a single detection over 81 channels: the thresholding does not inflate scores.
 * Point-wise recall is low for every method. Many labelled intervals are long, and the dynamic threshold
@@ -213,6 +249,8 @@ Vitest · Playwright.
 ```
 Spacecraft/
 ├── setup.ps1 / start.ps1 / stop.ps1     Windows setup, start and stop
+├── setup.sh / start.sh                  Linux / macOS setup and start
+├── deploy/huggingface/                  Dockerfile, Space card and publish.py (upload to a Hugging Face Space)
 ├── backend/
 │   ├── app/
 │   │   ├── api/          FastAPI routers (system, dataset, experiments, analysis)
@@ -246,6 +284,8 @@ the real dataset and a throwaway database):
 cd backend; .\.venv\Scripts\python -m pytest; cd ..
 ```
 
+On Linux / macOS: `cd backend && .venv/bin/python -m pytest`.
+
 Frontend component tests:
 
 ```powershell
@@ -275,6 +315,37 @@ across platforms and PyTorch builds.
 
 ---
 
+## Deployment (Docker / Hugging Face Spaces)
+
+`deploy/huggingface/Dockerfile` builds one CPU container in which FastAPI serves the API and the built UI on
+port 7860. The image downloads and verifies the benchmark and imports the reference results at build time.
+
+Run it locally (from the project root, with Docker installed):
+
+```bash
+docker build -f deploy/huggingface/Dockerfile -t heliograph .
+docker run --rm -p 7860:7860 heliograph      # then open http://localhost:7860  (API docs: /api/docs)
+```
+
+To publish it as a free Hugging Face Space, use the upload script (it needs your own Hugging Face account and a
+token with **write** permission from <https://huggingface.co/settings/tokens>):
+
+```bash
+pip install huggingface_hub
+hf auth login                                                    # paste the write token
+python deploy/huggingface/publish.py --space <your-username>/heliograph --dry-run   # check what will be sent
+python deploy/huggingface/publish.py --space <your-username>/heliograph
+```
+
+The script creates the Space (Docker SDK, free CPU) if needed, puts `deploy/huggingface/Dockerfile` and
+`deploy/huggingface/README.md` (the Space card) at its root, and uploads the project. Use it instead of a plain
+`git push` to the Space: the repository contains about 800 binary files (checkpoints, arrays, screenshots) and the
+Hub rejects binary files pushed with git unless they are stored in Git LFS / Xet; the upload API handles that for
+you. The first build takes about 10-15 minutes. A free CPU Space restarts when idle, so experiments trained there
+are not kept; the reference results are always available.
+
+---
+
 ## Configuration
 
 Environment variables (all optional):
@@ -296,9 +367,9 @@ For low-memory laptops, use the **Quick** profile and a few channels per experim
 | Problem | Fix |
 |---|---|
 | "running scripts is disabled" | `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` |
-| "Port 8000/5173 is already in use" | Run `.\stop.ps1`, or close the other program using the port |
-| Kaggle download fails | Setup falls back to the GitHub copy automatically. Or download the zip from the Kaggle page, save it as `data\incoming\data.zip`, then run `backend\.venv\Scripts\python scripts\acquire_data.py --source manual` |
-| UI shows "Backend unreachable" | Check `logs\backend.err.log`, then restart with `.\stop.ps1` and `.\start.ps1` |
+| "Port 8000/5173 is already in use" | Run `.\stop.ps1` (Linux/macOS: press Ctrl+C in the terminal running `./start.sh`), close the other program using the port, or pick other ports with `API_PORT=... UI_PORT=... ./start.sh` |
+| Kaggle download fails | Setup falls back to the GitHub copy automatically. Or download the zip from the Kaggle page, save it as `data\incoming\data.zip`, then run `backend\.venv\Scripts\python scripts\acquire_data.py --source manual` (Linux/macOS: `data/incoming/data.zip` and `backend/.venv/bin/python scripts/acquire_data.py --source manual`) |
+| UI shows "Backend unreachable" | Check `logs\backend.err.log`, then restart with `.\stop.ps1` and `.\start.ps1` (Linux/macOS: check `logs/backend.err.log`, press Ctrl+C and run `./start.sh` again) |
 | Project in OneDrive | Move it outside OneDrive; syncing can lock the database |
 | CUDA not used | Run `.\setup.ps1 -Cuda` (needs an NVIDIA driver); check the CPU/CUDA badge in the top bar |
 
@@ -326,7 +397,7 @@ could not be executed in the build environment.
 | 11 | Evaluation metrics are calculated from real results | PASS | Metric code unit-tested against hand-computed cases; the results table is generated from the database |
 | 12 | The dashboard displays actual application data | PASS | All overview figures come from SQL queries; a fresh database shows "No models evaluated yet" (asserted in Playwright) |
 | 13 | Experiment history is saved | PASS | SQLite persistence test across a backend restart, including recovery of interrupted jobs; reference bundle imported into a fresh database |
-| 14 | Important features pass automated tests | PASS | 38 pytest (23 unit, 15 integration on real data), 8 Vitest, 6 Playwright end-to-end — all passing |
+| 14 | Important features pass automated tests | PASS | 63 pytest (45 unit, 18 integration on real data), 8 Vitest, 6 Playwright end-to-end — all passing |
 | 15 | No critical runtime errors | PASS (Linux) | 567/567 reference channel runs succeeded; no browser console errors on any page |
 | 16 | Documentation explains how to run and reproduce | PASS | This README plus `docs/` (dataset, methodology, architecture, limitations, references) and the in-app Research page |
 
@@ -354,5 +425,6 @@ could not be executed in the build environment.
 
 * Limitations and interpretation: [docs/limitations.md](docs/limitations.md)
 * References: [docs/references.md](docs/references.md)
+* Code licence: [MIT](LICENSE).
 * Dataset licensing: Telemanom (Caltech/JPL copyright; README states Apache 2.0); the mirror used is BSD 3-Clause.
   The telemetry is not stored in this repository; it is downloaded during setup.

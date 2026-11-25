@@ -116,6 +116,11 @@ concatenation. These curves sweep a single global cut-off, which the dynamic thr
 Aggregation: counts are pooled across channels (micro-average); per-channel F1 is also averaged
 (macro). Results are reported overall, per spacecraft and per channel, with training/inference time.
 
+**Uncertainty.** `bootstrap_event_f_beta` (in `backend/app/ml/evaluation/metrics.py`) resamples
+channels with replacement and recomputes the pooled event F0.5 (10,000 draws, seed 0, percentile
+95 % intervals). The same resampled channel sets are used for every method, so differences between
+methods are paired. `scripts/results_table.py` prints these intervals under the reference table.
+
 **Comparability.** The paper reports precision 87.5 % / recall 80.0 % overall. These are not
 directly comparable to this project's numbers: the training profile, early-stopping/weight
 restoration, the thresholding deviations above, and the handling of `P-2` differ.

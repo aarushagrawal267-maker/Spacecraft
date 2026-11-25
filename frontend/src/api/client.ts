@@ -15,7 +15,7 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
   } catch {
-    throw new ApiError(0, "Cannot reach the Heliograph backend on http://localhost:8000. Is start.ps1 running?");
+    throw new ApiError(0, "Cannot reach the Heliograph backend. Is it running? Start it with start.ps1 (Windows) or ./start.sh (Linux/macOS).");
   }
   if (!res.ok) {
     let detail = res.statusText;

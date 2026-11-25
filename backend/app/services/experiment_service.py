@@ -57,9 +57,10 @@ def create_experiment(
         cfg = methods.resolve_config(method, profile, config)
     except ValueError as exc:
         raise ExperimentError(str(exc)) from exc
-    thr = ThresholdConfig.from_dict(threshold)
-    if thr.mode not in ("ndt", "static"):
-        raise ExperimentError("threshold mode must be 'ndt' or 'static'")
+    try:
+        thr = ThresholdConfig.from_dict(threshold)
+    except (TypeError, ValueError) as exc:
+        raise ExperimentError(str(exc)) from exc
     sc, chans = resolve_channels(db, spacecraft, channels)
     if not chans:
         raise ExperimentError("No channels selected")

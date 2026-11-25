@@ -266,3 +266,58 @@ def aggregate(channel_metrics: Sequence[dict]) -> dict:
         },
         "mean_average_precision": float(np.mean(aps)) if aps else None,
     }
+
+
+def bootstrap_event_f_beta(
+    counts: dict[str, np.ndarray],
+    reference: str | None = None,
+    beta: float = 0.5,
+    n_boot: int = 10_000,
+    seed: int = 0,
+    level: float = 0.95,
+) -> dict:
+    """Channel-level bootstrap confidence intervals for pooled event-wise F-beta.
+
+    ``counts`` maps a method name to an array of shape (n_channels, 3) holding the
+    per-channel event (tp, fp, fn), with rows aligned to the same channel order for
+    every method. Channels are resampled with replacement; the *same* resampled
+    channel sets are used for every method, so the differences against
+    ``reference`` are paired. Percentile intervals; with ~100 labelled sequences
+    they are wide, which is the point of reporting them.
+
+    F-beta is taken as 0 when no sequence is detected (recall 0), which is exact
+    because precision is then either 0 or undefined.
+    """
+    arrays = {k: np.asarray(v, dtype=float) for k, v in counts.items()}
+    n = {a.shape[0] for a in arrays.values()}
+    if len(n) != 1 or any(a.ndim != 2 or a.shape[1] != 3 for a in arrays.values()):
+        raise ValueError("counts must be aligned (n_channels, 3) arrays of tp, fp, fn")
+    n_ch = n.pop()
+    if n_ch == 0:
+        raise ValueError("bootstrap needs at least one channel")
+    if reference is not None and reference not in arrays:
+        raise ValueError(f"reference {reference!r} is not among the methods")
+
+    def fb(t: np.ndarray) -> np.ndarray:
+        tp, fp, fn = t[..., 0], t[..., 1], t[..., 2]
+        p = np.divide(tp, tp + fp, out=np.zeros_like(tp), where=(tp + fp) > 0)
+        r = np.divide(tp, tp + fn, out=np.zeros_like(tp), where=(tp + fn) > 0)
+        b2 = beta * beta
+        den = b2 * p + r
+        return np.divide((1 + b2) * p * r, den, out=np.zeros_like(tp), where=den > 0)
+
+    idx = np.random.default_rng(seed).integers(0, n_ch, size=(n_boot, n_ch))
+    alpha = (1 - level) / 2
+    q = [100 * alpha, 100 * (1 - alpha)]
+    samples = {k: fb(a[idx].sum(axis=1)) for k, a in arrays.items()}
+    est = {k: float(fb(a.sum(axis=0))) for k, a in arrays.items()}
+    out: dict = {"n_channels": n_ch, "n_boot": n_boot, "seed": seed, "level": level, "methods": {}}
+    for k in arrays:
+        lo, hi = np.percentile(samples[k], q)
+        out["methods"][k] = {"estimate": est[k], "lo": float(lo), "hi": float(hi)}
+        if reference is not None and k != reference:
+            dlo, dhi = np.percentile(samples[reference] - samples[k], q)
+            out["methods"][k]["diff_vs_reference"] = {
+                "estimate": est[reference] - est[k], "lo": float(dlo), "hi": float(dhi),
+            }
+    return out

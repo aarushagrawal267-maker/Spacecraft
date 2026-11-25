@@ -3,6 +3,7 @@ import pytest
 
 from app.ml.evaluation.metrics import (
     aggregate,
+    bootstrap_event_f_beta,
     clip_labels,
     evaluate_channel,
     event_metrics,
@@ -86,3 +87,31 @@ def test_aggregate_micro_and_macro():
     assert g["event"]["by_class"]["point"]["recall"] == pytest.approx(1 / 3)
     assert g["point"]["fpr"] == pytest.approx(5 / 185)
     assert g["mean_average_precision"] == pytest.approx(0.4)
+
+
+def test_bootstrap_event_f_beta_estimate_ci_and_paired_difference():
+    # Method A detects every label; B misses half of them. Channel order is shared.
+    a = np.array([[1, 0, 0], [2, 1, 0], [1, 0, 0], [1, 0, 0]])
+    b = np.array([[0, 0, 1], [1, 1, 1], [1, 0, 0], [0, 0, 1]])
+    r = bootstrap_event_f_beta({"a": a, "b": b}, reference="a", n_boot=2000, seed=1)
+    ea, eb = r["methods"]["a"], r["methods"]["b"]
+    assert ea["estimate"] == pytest.approx(f_beta(5 / 6, 1.0, 0.5))
+    assert eb["estimate"] == pytest.approx(f_beta(2 / 3, 2 / 5, 0.5))
+    assert ea["lo"] <= ea["estimate"] <= ea["hi"]
+    assert eb["lo"] <= eb["estimate"] <= eb["hi"]
+    d = eb["diff_vs_reference"]
+    assert d["estimate"] == pytest.approx(ea["estimate"] - eb["estimate"])
+    assert d["lo"] <= d["estimate"] <= d["hi"]
+    assert "diff_vs_reference" not in ea
+    # deterministic for a fixed seed
+    assert bootstrap_event_f_beta({"a": a, "b": b}, reference="a", n_boot=2000, seed=1) == r
+
+
+def test_bootstrap_event_f_beta_no_detections_is_zero_and_rejects_misaligned():
+    none = np.array([[0, 0, 2], [0, 0, 1]])
+    r = bootstrap_event_f_beta({"none": none}, n_boot=200)
+    assert r["methods"]["none"] == {"estimate": 0.0, "lo": 0.0, "hi": 0.0}
+    with pytest.raises(ValueError):
+        bootstrap_event_f_beta({"a": none, "b": np.zeros((3, 3))})
+    with pytest.raises(ValueError):
+        bootstrap_event_f_beta({"a": none}, reference="missing")

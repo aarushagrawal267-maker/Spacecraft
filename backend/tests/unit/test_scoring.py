@@ -146,3 +146,18 @@ def test_static_threshold_uses_training_statistics_only():
     assert st.epsilon == pytest.approx(0.15 + 3 * 0.05)
     st.push(np.array([0, 0, 0.5, 0.5, 0, 0.5, 0, 0, 0, 0]))
     assert [(i.start, i.end) for i in st.intervals()] == [(2, 3)]  # single points dropped
+
+
+@pytest.mark.parametrize("bad", [
+    {"mode": "bogus"}, {"p": None}, {"p": "abc"}, {"p": 1.5}, {"batch_size": 0}, {"batch_size": 2.5},
+    {"error_buffer": -1}, {"static_k": float("nan")}, {"z_min": 5, "z_max": 4}, {"inverse": "yes"},
+])
+def test_threshold_config_rejects_bad_values(bad):
+    with pytest.raises(ValueError):
+        ThresholdConfig.from_dict(bad)
+
+
+def test_threshold_config_accepts_defaults_and_coerces_numbers():
+    assert ThresholdConfig.from_dict(None) == ThresholdConfig()
+    cfg = ThresholdConfig.from_dict({"mode": "static", "static_k": 2, "error_buffer": 50.0, "unknown": 1})
+    assert cfg.static_k == 2.0 and isinstance(cfg.error_buffer, int) and cfg.error_buffer == 50
