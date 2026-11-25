@@ -163,16 +163,35 @@ These are the experiments shipped in `reference/` and shown as **Reference** in 
 | Isolation Forest | 0.282 | 0.288 | 0.053 | 0.077 | 13.1% | 4.7% |
 | Random scores (control) | — | 0.000 | — | 0.000 | 0.0% | 0.0% |
 
+"mean AP" is the average precision of the smoothed score computed per channel and averaged over the 81 channels.
 Threshold-free, pooled over channels (each channel's smoothed score standardised): average precision —
-LSTM forecaster 0.414, Ridge AR 0.382, LSTM autoencoder 0.289,
-random control 0.119; ROC AUC — Ridge AR 0.716, LSTM forecaster 0.706,
-LSTM autoencoder 0.608, random control 0.47.
+LSTM forecaster 0.414, Ridge AR 0.382, LSTM autoencoder 0.289, rolling z-score 0.268, persistence 0.265,
+Isolation Forest 0.239, random control 0.119 (the labelled share of evaluated points is 0.130); ROC AUC —
+Ridge AR 0.716, LSTM forecaster 0.706, LSTM autoencoder 0.608, rolling z-score 0.598, Isolation Forest 0.591,
+persistence 0.550, random control 0.470.
+
+Event F0.5 with 95 % channel-bootstrap intervals (81 channels resampled with replacement, 10,000 draws, seed 0; differences are paired against LSTM forecaster):
+
+| Method | Event F0.5 [95 % CI] | LSTM forecaster minus method [95 % CI] |
+|---|---|---|
+| LSTM forecaster | 0.666 [0.595, 0.740] | — |
+| LSTM autoencoder | 0.659 [0.568, 0.743] | +0.007 [-0.089, +0.108] |
+| Ridge autoregression | 0.605 [0.516, 0.697] | +0.061 [-0.035, +0.158] |
+| Persistence forecast | 0.560 [0.464, 0.659] | +0.106 [+0.020, +0.195] |
+| Rolling z-score | 0.554 [0.467, 0.642] | +0.112 [+0.034, +0.190] |
+| Isolation Forest | 0.284 [0.138, 0.415] | +0.382 [+0.223, +0.557] |
+| Random scores (control) | 0.000 [0.000, 0.000] | +0.666 [+0.595, +0.740] |
 
 **Reading these results**
 
-* The **LSTM forecaster** has the best event-wise balance (F0.5) and the best recall on *contextual* anomalies,
+* The **LSTM forecaster** has the highest event-wise F0.5 and the best recall on *contextual* anomalies,
   which is where a non-linear temporal model should help most. It does **not** win everywhere: Ridge
   autoregression matches it on MSL event F0.5 and slightly exceeds it on pooled ROC AUC.
+* **The ranking at the top is not statistically settled.** With only 104 labelled sequences the bootstrap
+  intervals above are about ±0.07–0.10 wide. The LSTM forecaster's lead over the LSTM autoencoder (+0.007) and
+  over Ridge autoregression (+0.061) is inside that noise (both paired intervals include 0); only its margins
+  over persistence, rolling z-score, Isolation Forest and the random control exclude 0. All figures come from a
+  single seed (0); seed-to-seed variation of the neural models was not measured.
 * The **LSTM autoencoder** is the most precise but misses more sequences (low recall).
 * The **random control** produces a single detection over 81 channels: the thresholding does not inflate scores.
 * Point-wise recall is low for every method. Many labelled intervals are long, and the dynamic threshold
@@ -378,7 +397,7 @@ could not be executed in the build environment.
 | 11 | Evaluation metrics are calculated from real results | PASS | Metric code unit-tested against hand-computed cases; the results table is generated from the database |
 | 12 | The dashboard displays actual application data | PASS | All overview figures come from SQL queries; a fresh database shows "No models evaluated yet" (asserted in Playwright) |
 | 13 | Experiment history is saved | PASS | SQLite persistence test across a backend restart, including recovery of interrupted jobs; reference bundle imported into a fresh database |
-| 14 | Important features pass automated tests | PASS | 57 pytest (39 unit, 18 integration on real data), 8 Vitest, 6 Playwright end-to-end — all passing |
+| 14 | Important features pass automated tests | PASS | 60 pytest (42 unit, 18 integration on real data), 8 Vitest, 6 Playwright end-to-end — all passing |
 | 15 | No critical runtime errors | PASS (Linux) | 567/567 reference channel runs succeeded; no browser console errors on any page |
 | 16 | Documentation explains how to run and reproduce | PASS | This README plus `docs/` (dataset, methodology, architecture, limitations, references) and the in-app Research page |
 

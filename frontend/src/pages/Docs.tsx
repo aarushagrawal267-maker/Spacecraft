@@ -93,7 +93,7 @@ export default function Docs() {
           </p>
           <p>
             The Telemanom README states that values were scaled to (−1, 1) using the test set's minimum and maximum. In the files obtained here,
-            several channels nevertheless exceed that range (up to 258 on <code>M-6</code>), and 14 channels have a constant training value.
+            several channels nevertheless exceed that range (up to 258 on <code>M-6</code>), and 16 channels have a constant training value.
             Both observations are reported by the validator and shown in the Dataset Explorer.
           </p>
           <p>

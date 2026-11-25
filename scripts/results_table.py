@@ -64,6 +64,36 @@ def main() -> None:
                   f"{num(bs.get('MSL', {}).get('event', {}).get('f0_5'))} | {num(bs.get('SMAP', {}).get('point', {}).get('f1'))} | "
                   f"{num(bs.get('MSL', {}).get('point', {}).get('f1'))} | {pct(ov.get('point', {}).get('recall'))} | "
                   f"{pct(ov.get('contextual', {}).get('recall'))} |")
+        print_bootstrap(exps)
+
+
+def print_bootstrap(exps) -> None:
+    """Channel-bootstrap 95 % intervals for event F0.5, paired against the first method in ORDER."""
+    import numpy as np
+
+    from app.ml.evaluation.metrics import bootstrap_event_f_beta
+    from app.ml.methods import SPECS
+
+    per = {}
+    for e in exps:
+        per[e.method] = {r.chan_id: r.metrics["event"] for r in e.runs if r.status == "completed" and r.metrics}
+    if not per:
+        return
+    common = sorted(set.intersection(*(set(v) for v in per.values())))
+    counts = {m: np.array([[v[c]["tp"], v[c]["fp"], v[c]["fn"]] for c in common]) for m, v in per.items()}
+    ref = exps[0].method
+    b = bootstrap_event_f_beta(counts, reference=ref, n_boot=10_000, seed=0)
+    print()
+    print(f"Event F0.5 with 95 % channel-bootstrap intervals ({b['n_channels']} channels resampled with replacement, "
+          f"{b['n_boot']:,} draws, seed {b['seed']}; differences are paired against {SPECS[ref].label}):")
+    print()
+    print(f"| Method | Event F0.5 [95 % CI] | {SPECS[ref].label} minus method [95 % CI] |")
+    print("|---|---|---|")
+    for e in exps:
+        r = b["methods"][e.method]
+        d = r.get("diff_vs_reference")
+        diff = "—" if d is None else f"{d['estimate']:+.3f} [{d['lo']:+.3f}, {d['hi']:+.3f}]"
+        print(f"| {SPECS[e.method].label} | {r['estimate']:.3f} [{r['lo']:.3f}, {r['hi']:.3f}] | {diff} |")
 
 
 if __name__ == "__main__":

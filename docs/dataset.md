@@ -57,9 +57,10 @@ data/raw/smap_msl/            (read-only after installation)
 * Channel identifiers are anonymised and are **not** real instrument names.
 * Time is anonymised: positions only, no timestamps, no engineering units.
 * Values are pre-processed. The Telemanom README says telemetry was scaled to (−1, 1) using the
-  **test-set** min/max. In the obtained files, 14 channels exceed that range (e.g. `M-6` reaches
-  258.1, `F-5` 6.95), and 14 channels have a **constant** training value (`B-1`, `C-2`, `D-2`,
-  `D-7`, `D-8`, `D-9`, `D-12`, `D-13`, `D-14`, `G-2`, `M-6`, `P-4`, `S-2`, `T-5`).
+  **test-set** min/max. In the obtained files, 16 channels exceed that range by more than 1e-4
+  (e.g. `M-6` reaches 258.1, `F-5` 6.95), and 16 channels have a **constant** training value:
+  14 at −1 (`B-1`, `C-2`, `D-2`, `D-7`, `D-8`, `D-9`, `D-12`, `D-13`, `D-14`, `G-2`, `M-6`, `P-4`,
+  `S-2`, `T-5`) and 2 at 0.999 (`A-1`, `R-1`).
 * Anomaly intervals are benchmark reference annotations derived from expert review, not confirmed
   hardware failures; unlabelled regions are not guaranteed normal.
 * No missing (non-finite) values occur in any file.

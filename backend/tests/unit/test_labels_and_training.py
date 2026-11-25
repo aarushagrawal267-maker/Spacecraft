@@ -48,3 +48,26 @@ def test_chronological_split_is_ordered_with_gap():
     tr, va = chronological_split(40, 0.2, gap=100, min_train=32)
     assert len(tr) == 32 and len(va) == 8  # gap shrinks for short series
     assert np.intersect1d(tr, va).size == 0
+
+
+def test_validator_flags_float_constant_training_channel(tmp_path):
+    # A-1 and R-1 in the benchmark are constant at 0.999, but np.std returns ~1e-16, not 0.
+    from app.dataset.validate import validate_dataset
+
+    csv_text = ('chan_id,spacecraft,anomaly_sequences,class,num_values\n'
+                'A-1,SMAP,"[[10, 20]]",[point],50\n'
+                'B-1,SMAP,"[[10, 20]]",[point],50\n')
+    (tmp_path / "train").mkdir()
+    (tmp_path / "test").mkdir()
+    const = np.zeros((2880, 2))
+    const[:, 0] = 0.999
+    assert np.std(const[:, 0]) != 0.0  # the float artefact this test guards against
+    varying = np.zeros((100, 2))
+    varying[:, 0] = np.linspace(-1, 1, 100)
+    np.save(tmp_path / "train" / "A-1.npy", const)
+    np.save(tmp_path / "train" / "B-1.npy", varying)
+    for c in ("A-1", "B-1"):
+        np.save(tmp_path / "test" / f"{c}.npy", np.zeros((50, 2)))
+    rep = validate_dataset(tmp_path, parse_label_text(csv_text))
+    constant = {w.split(":")[0] for w in rep.warnings if "training telemetry is constant" in w}
+    assert constant == {"A-1"}

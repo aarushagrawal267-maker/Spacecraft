@@ -76,6 +76,8 @@ function Leaderboard({ rows }: { rows: Experiment[] }) {
           Event-wise metrics follow the protocol of Hundman et al.; point-wise F1 counts every evaluated timestep without point
           adjustment. Values are computed by this application on test indices ≥ 250 of all 81 channels and are{" "}
           <em>not</em> directly comparable with the paper (different preprocessing details and implementation).
+          With only 104 labelled sequences, event F0.5 carries a 95 % channel-bootstrap interval of roughly ±0.07–0.10 for the
+          stronger methods, and each reference run uses a single seed, so small gaps between methods are not a reliable ranking.
         </p>
       </div>
       <div>

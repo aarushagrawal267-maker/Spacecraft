@@ -118,7 +118,9 @@ def validate_dataset(root: Path, labels: LabelFile) -> ValidationReport:
         if c.value_min < -1.0001 or c.value_max > 1.0001:
             warnings.append(f"{chan}: telemetry outside [-1, 1] ({c.value_min:.3f}, {c.value_max:.3f})")
         c.train_value_std = float(np.nanstd(tr[:, 0]))
-        if c.train_value_std == 0.0:
+        # np.std of a constant float series can be ~1e-16 rather than 0 (A-1 and R-1 are
+        # constant at 0.999), so test for constancy exactly with the value range.
+        if tr.shape[0] and np.nanmax(tr[:, 0]) == np.nanmin(tr[:, 0]):
             c.issues.append("constant telemetry value in training split")
             warnings.append(f"{chan}: training telemetry is constant")
 
