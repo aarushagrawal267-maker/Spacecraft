@@ -93,8 +93,7 @@ value ranges, binary command columns, constant channels. Only a copy that passes
 Archives are extracted with path-traversal protection and arrays are loaded with
 `allow_pickle=False`.
 
-The reference results in this repository were computed on data obtained from the **GitHub mirror**,
-because the cloud build environment could not reach Kaggle.
+The reference results in this repository were computed on data obtained from the **GitHub mirror**.
 
 ## Licensing
 

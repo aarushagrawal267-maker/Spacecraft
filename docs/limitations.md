@@ -48,13 +48,13 @@ The app distinguishes:
 * The reference run used the "standard" LSTM profile, not the full "paper" profile, to keep CPU time
   reasonable. Users can run the paper profile from the laboratory.
 * On a laptop CPU, LSTM training takes minutes per channel. An all-channel LSTM run can take hours.
-* Floating-point results differ slightly across platforms and PyTorch builds. In an audit re-run
+* Floating-point results differ slightly across platforms and PyTorch builds. In a re-run
   (PyTorch 2.15.0+cpu instead of +cu132, a different Linux host) the five non-neural baselines reproduced every
   detection and metric exactly on all 81 channels, and retraining the LSTM forecaster and autoencoder
   on `A-1` and `D-3` reproduced the stored detections; three of the four best validation losses were bit-identical and
   the fourth agreed to 5 significant digits.
-* The Windows scripts were syntax-checked with PowerShell 7.4 on Linux but could not be executed on
-  Windows in the build environment. See the acceptance report in the README.
+* The Windows scripts were syntax-checked with PowerShell 7.4 on Linux but have not yet been run on
+  Windows. See "Project status and verification" in the README for a short check to run.
 
 ## Statistical uncertainty
 

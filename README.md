@@ -30,7 +30,7 @@ full evaluation suite.
 10. [Deployment (Docker / Hugging Face Spaces)](#deployment-docker--hugging-face-spaces)
 11. [Configuration](#configuration)
 12. [Troubleshooting](#troubleshooting)
-13. [Acceptance status](#acceptance-status)
+13. [Project status and verification](#project-status-and-verification)
 14. [Limitations, references and licence](#limitations-references-and-licence)
 
 ---
@@ -375,49 +375,37 @@ For low-memory laptops, use the **Quick** profile and a few channels per experim
 
 ---
 
-## Acceptance status
+## Project status and verification
 
-<!-- ACCEPTANCE:START -->
-Status of every acceptance criterion from the project brief, as verified during development
-(Linux cloud container, 4 CPU cores, no GPU). **PASS** means tested and observed; **NOT VERIFIED** means it
-could not be executed in the build environment.
+What has been checked, and how. Everything below was run on Linux (4 CPU cores, no GPU).
 
-| # | Criterion | Status | Evidence |
-|---|---|---|---|
-| 1 | The application starts successfully on Windows | **NOT VERIFIED** | No Windows machine was available. `setup.ps1`, `start.ps1` and `stop.ps1` parse without errors in PowerShell 7.4 and avoid PowerShell 7-only syntax (they target Windows PowerShell 5.1). The same backend/frontend start commands were run on Linux. Please run the check below. |
-| 2 | Frontend and backend communicate | PASS | All 6 Playwright workflows drive the UI through the Vite proxy to FastAPI |
-| 3 | Real SMAP and MSL data can be loaded | PASS | 81 channels / 162 telemetry files acquired, SHA-256 manifest written; counts reproduce the Telemanom README (429,735 / 66,709 evaluated values) |
-| 4 | Annotations correctly interpreted | PASS | Unit tests for parsing and merging; every test length equals `num_values`; 105 → 104 sequences after merging `P-2` (disclosed) |
-| 5 | The LSTM can be trained locally | PASS (Linux CPU) | Reference run: 81/81 channels trained (3.54 h CPU in total); a Quick LSTM is trained through the UI in the Playwright test |
-| 6 | Actual telemetry predictions are generated | PASS | Live inference from a bundled checkpoint reproduces the stored predictions exactly (max difference 0.0) |
-| 7 | Anomaly scores come from real model outputs | PASS | Scores are absolute forecast/reconstruction errors of the trained models; the label-leakage tests pass |
-| 8 | The thresholding method works | PASS | 11 unit tests (spike detection, inverse pass, scale guard, pruning, exact zone tiling, streaming = offline) |
-| 9 | Detected intervals can be inspected | PASS | Investigation page and API detail endpoint; Playwright workflow |
-| 10 | Results can be compared with reference annotations | PASS | Per-label detected/missed, delay, IoU; event-wise and point-wise metrics |
-| 11 | Evaluation metrics are calculated from real results | PASS | Metric code unit-tested against hand-computed cases; the results table is generated from the database |
-| 12 | The dashboard displays actual application data | PASS | All overview figures come from SQL queries; a fresh database shows "No models evaluated yet" (asserted in Playwright) |
-| 13 | Experiment history is saved | PASS | SQLite persistence test across a backend restart, including recovery of interrupted jobs; reference bundle imported into a fresh database |
-| 14 | Important features pass automated tests | PASS | 63 pytest (45 unit, 18 integration on real data), 8 Vitest, 6 Playwright end-to-end — all passing |
-| 15 | No critical runtime errors | PASS (Linux) | 567/567 reference channel runs succeeded; no browser console errors on any page |
-| 16 | Documentation explains how to run and reproduce | PASS | This README plus `docs/` (dataset, methodology, architecture, limitations, references) and the in-app Research page |
+| Area | How it was verified |
+|---|---|
+| Real SMAP and MSL data | 81 channels / 162 telemetry files installed and recorded in a SHA-256 manifest; the counts reproduce the Telemanom README (429,735 / 66,709 evaluated values) |
+| Anomaly labels | Unit tests for parsing and merging; every test length equals `num_values`; 105 → 104 sequences after merging `P-2` (see [docs/dataset.md](docs/dataset.md)) |
+| LSTM training | Reference run: 81/81 channels trained (3.54 h of CPU time in total); a Quick LSTM is trained through the UI in an end-to-end test |
+| Predictions and scores | Live inference from a bundled checkpoint reproduces the stored predictions exactly (max difference 0.0); scores are the absolute forecast/reconstruction errors of the trained models, and label-leakage tests pass |
+| Thresholding | 11 unit tests (spike detection, inverse pass, scale guard, pruning, exact zone tiling, streaming = offline) |
+| Inspection and comparison with labels | Investigation page and API detail endpoint; per-label detected/missed, delay and IoU; event-wise and point-wise metrics, unit-tested against hand-computed cases |
+| Dashboard and history | All overview figures come from SQL queries; experiment history survives a backend restart, including recovery of interrupted jobs |
+| Automated tests | 66 pytest (48 unit, 18 integration on real data), 8 Vitest, 6 Playwright end-to-end workflows, all passing |
+| Runtime errors | 567/567 reference channel runs succeeded; no browser console errors on any page |
 
-**Deviations from the approved plan (all deliberate):**
+**Notes on the reference results**
 
-* The cloud build environment could not reach Kaggle (blocked by its network policy), so the reference data
-  came from the pinned GitHub copy. Its label file is byte-identical to the official one, and every file was
-  validated. `setup.ps1` still tries Kaggle first.
-* The reference LSTM used the **standard** profile (64 units, ≤ 20 epochs) rather than the full paper profile, to
+* The reference results were computed on the pinned GitHub copy of the dataset. Its label file is byte-identical to
+  the official one and every file passed validation. Setup tries Kaggle first.
+* The reference LSTM uses the **standard** profile (64 units, ≤ 20 epochs) rather than the full paper profile, to
   keep CPU time reasonable. The paper profile is available in the laboratory.
-* Plotly.js is the only chart library (Recharts was not added). API types in the frontend are hand-written
-  rather than generated.
 
-**Windows check to run once** (about 10 minutes plus downloads):
+**Windows.** The Windows scripts (`setup.ps1`, `start.ps1`, `stop.ps1`) target Windows PowerShell 5.1 and parse
+without errors in PowerShell 7.4, but they have not yet been run on a Windows machine. To check them (about
+10 minutes plus downloads):
 
 1. `.\setup.ps1 -DownloadData` ends with "Setup complete".
 2. `.\start.ps1` opens <http://localhost:5173>, and the top bar shows "Benchmark loaded".
 3. In the Model Laboratory, train the LSTM forecaster with the Quick profile on one channel, then open it in the Detection Centre.
 4. `.\stop.ps1` reports "Heliograph stopped".
-<!-- ACCEPTANCE:END -->
 
 ---
 
