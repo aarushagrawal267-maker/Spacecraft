@@ -1,5 +1,8 @@
 # Heliograph — Spacecraft Telemetry Anomaly Detection
 
+**Live demo:** https://huggingface.co/spaces/agrawalaarush08/heliograph (browser demo: a viewer of the stored
+reference results for all 7 methods and 81 channels; the full app runs locally)
+
 Heliograph is a locally runnable research platform for **anomaly detection in real spacecraft telemetry**
 from NASA's **SMAP** satellite and the **Mars Science Laboratory (Curiosity)** rover. It trains per-channel
 **LSTM forecasters**, scores their prediction errors, applies **nonparametric dynamic thresholding**, and lets
@@ -27,7 +30,7 @@ full evaluation suite.
 7. [Project structure](#project-structure)
 8. [Testing](#testing)
 9. [Reproducing the experiments](#reproducing-the-experiments)
-10. [Deployment (Docker / Hugging Face Spaces)](#deployment-docker--hugging-face-spaces)
+10. [Deployment (browser demo / Docker)](#deployment-browser-demo--docker)
 11. [Configuration](#configuration)
 12. [Troubleshooting](#troubleshooting)
 13. [Project status and verification](#project-status-and-verification)
@@ -315,9 +318,21 @@ across platforms and PyTorch builds.
 
 ---
 
-## Deployment (Docker / Hugging Face Spaces)
+## Deployment (browser demo / Docker)
 
-`deploy/huggingface/Dockerfile` builds one CPU container in which FastAPI serves the API and the built UI on
+**Browser demo.** The [live demo](https://huggingface.co/spaces/agrawalaarush08/heliograph) is a static page built
+by `deploy/browser/build.py`. It shows the stored reference results from `reference/` (benchmark scores, and for
+every channel and method the model forecast, smoothed error, dynamic thresholds, detected intervals and expert
+labels). It trains and computes nothing; the telemetry is not copied into it but downloaded in the browser from the
+same pinned public GitHub copy of the benchmark that setup uses. Static Spaces are free:
+
+```bash
+backend/.venv/bin/python deploy/browser/build.py --out build/browser-demo
+pip install huggingface_hub && hf auth login
+backend/.venv/bin/python deploy/browser/build.py --out build/browser-demo --space <your-username>/heliograph
+```
+
+**Full app in Docker.** `deploy/huggingface/Dockerfile` builds one CPU container in which FastAPI serves the API and the built UI on
 port 7860. The image downloads and verifies the benchmark and imports the reference results at build time.
 
 Run it locally (from the project root, with Docker installed):
@@ -327,8 +342,10 @@ docker build -f deploy/huggingface/Dockerfile -t heliograph .
 docker run --rm -p 7860:7860 heliograph      # then open http://localhost:7860  (API docs: /api/docs)
 ```
 
-To publish it as a free Hugging Face Space, use the upload script (it needs your own Hugging Face account and a
-token with **write** permission from <https://huggingface.co/settings/tokens>):
+To publish the full app as a Hugging Face Docker Space, use the upload script (it needs a Hugging Face account and a
+token with **write** permission from <https://huggingface.co/settings/tokens>). Hugging Face currently requires a
+PRO subscription to run Docker Spaces, even on the basic CPU hardware; without one, creating the Space fails with
+HTTP 402.
 
 ```bash
 pip install huggingface_hub
@@ -337,12 +354,12 @@ python deploy/huggingface/publish.py --space <your-username>/heliograph --dry-ru
 python deploy/huggingface/publish.py --space <your-username>/heliograph
 ```
 
-The script creates the Space (Docker SDK, free CPU) if needed, puts `deploy/huggingface/Dockerfile` and
+The script creates the Space (Docker SDK, basic CPU) if needed, puts `deploy/huggingface/Dockerfile` and
 `deploy/huggingface/README.md` (the Space card) at its root, and uploads the project. Use it instead of a plain
 `git push` to the Space: the repository contains about 800 binary files (checkpoints, arrays, screenshots) and the
 Hub rejects binary files pushed with git unless they are stored in Git LFS / Xet; the upload API handles that for
-you. The first build takes about 10-15 minutes. A free CPU Space restarts when idle, so experiments trained there
-are not kept; the reference results are always available.
+you. The first build takes about 10-15 minutes. A CPU Space restarts when idle, so experiments trained there are not
+kept; the reference results are always available.
 
 ---
 
@@ -388,7 +405,7 @@ What has been checked, and how. Everything below was run on Linux (4 CPU cores, 
 | Thresholding | 11 unit tests (spike detection, inverse pass, scale guard, pruning, exact zone tiling, streaming = offline) |
 | Inspection and comparison with labels | Investigation page and API detail endpoint; per-label detected/missed, delay and IoU; event-wise and point-wise metrics, unit-tested against hand-computed cases |
 | Dashboard and history | All overview figures come from SQL queries; experiment history survives a backend restart, including recovery of interrupted jobs |
-| Automated tests | 66 pytest (48 unit, 18 integration on real data), 8 Vitest, 6 Playwright end-to-end workflows, all passing |
+| Automated tests | 68 pytest (48 unit, 20 integration on real data), 8 Vitest, 6 Playwright end-to-end workflows, all passing |
 | Runtime errors | 567/567 reference channel runs succeeded; no browser console errors on any page |
 
 **Notes on the reference results**

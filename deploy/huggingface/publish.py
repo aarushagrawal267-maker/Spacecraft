@@ -1,4 +1,7 @@
-"""Publish Heliograph to a Hugging Face Space (Docker SDK, free CPU hardware).
+"""Publish Heliograph to a Hugging Face Space (Docker SDK, basic CPU hardware).
+
+Hugging Face currently requires a PRO subscription for Docker Spaces (creating one on a free account fails with
+HTTP 402). The free alternative is the static browser demo: deploy/browser/build.py.
 
     pip install huggingface_hub
     hf auth login                                   # paste a token with "write" permission

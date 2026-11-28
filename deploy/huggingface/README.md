@@ -20,5 +20,5 @@ Detected anomalies are unusual patterns that warrant investigation, not confirme
 
 Source code: https://github.com/aarushagrawal267-maker/Spacecraft · API docs: `/api/docs`
 
-Note: this free CPU Space restarts when idle; experiments you train here are not kept after a restart.
+Note: this CPU Space restarts when idle; experiments you train here are not kept after a restart.
 The reference results are always available.
