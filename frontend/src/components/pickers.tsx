@@ -34,7 +34,7 @@ export function ChannelPicker({
           if (first && current?.spacecraft !== v) onChange(first.chan_id);
         }}
       />
-      <Select ariaLabel="Telemetry channel" value={chan} onChange={onChange} className="num w-[150px]">
+      <Select ariaLabel="Telemetry channel" value={chan} onChange={onChange} className="num w-38">
         {list.map((c) => (
           <option key={c.chan_id} value={c.chan_id}>
             {c.chan_id} · {c.n_intervals} label{c.n_intervals === 1 ? "" : "s"}
@@ -74,10 +74,10 @@ export function RunPicker({
 }) {
   const runs = useRunsForChannel(chan).filter((r) => !requireModel || r.has_model || isStateless(r.method));
   if (!runs.length) {
-    return <span className="text-[12.5px] text-muted">No trained runs for {chan}</span>;
+    return <span className="text-sm text-muted">No trained runs for {chan}</span>;
   }
   return (
-    <Select ariaLabel="Trained run" value={String(runId ?? "")} onChange={(v) => onChange(Number(v))} className="max-w-[380px]">
+    <Select ariaLabel="Trained run" value={String(runId ?? "")} onChange={(v) => onChange(Number(v))} className="w-full max-w-[380px]">
       {runs.map((r) => (
         <option key={r.run_id} value={r.run_id}>
           {r.experiment_name} (exp {r.experiment_id})

@@ -19,7 +19,7 @@ function Detail({ id }: { id: number }) {
       <Panel
         eyebrow={`${x.spacecraft} · ${x.chan_id} · detection #${x.id}`}
         title={`Model-detected interval ${x.start}–${x.end}`}
-        actions={<Link to={`/detect?chan=${x.chan_id}&run=${x.run_id}`} className="text-[12.5px] text-accent hover:underline">Open full channel →</Link>}
+        actions={<Link to={`/detect?chan=${x.chan_id}&run=${x.run_id}`} className="text-sm text-accent hover:underline">Open full channel →</Link>}
       >
         <Legend
           items={[
@@ -70,7 +70,7 @@ function Detail({ id }: { id: number }) {
           ) : (
             <KV k="Static ε (training μ + kσ)" v={fmtNum(w.epsilon as number, 4)} />
           )}
-          <p className="mt-3 text-[11.5px] leading-relaxed text-dim">{x.confidence_note}</p>
+          <p className="mt-3 text-xs leading-relaxed text-dim">{x.confidence_note}</p>
         </Panel>
         <Panel eyebrow="Benchmark reference" title="Expert annotation">
           <div className="mb-3"><OutcomeTag outcome={x.outcome} /></div>
@@ -154,7 +154,7 @@ export default function Investigation() {
                 placeholder="Channel…"
                 value={chanFilter}
                 onChange={(e) => setChanFilter(e.target.value)}
-                className="num h-7 w-24 rounded-md border border-edge bg-raised px-2 text-[12.5px] text-ink outline-none"
+                className="num h-7 w-24 rounded-md border border-edge bg-raised px-2 text-sm text-ink outline-none"
               />
             </div>
           </div>
@@ -164,11 +164,11 @@ export default function Investigation() {
             ) : !dets.data ? (
               <div className="p-4"><Loading height={300} /></div>
             ) : rows.length === 0 ? (
-              <div className="p-4 text-[13px] text-muted">No detected intervals match.</div>
+              <div className="p-4 text-sm text-muted">No detected intervals match.</div>
             ) : (
-              <table className="w-full text-[12.5px]">
+              <table className="w-full text-sm">
                 <thead className="sticky top-0 bg-panel">
-                  <tr className="text-left text-[11px] text-muted">
+                  <tr className="text-left text-xs text-muted">
                     <th className="px-5 py-2 font-medium">Channel</th>
                     <th className="py-2 font-medium">Interval</th>
                     <th className="py-2 text-right font-medium">Score</th>

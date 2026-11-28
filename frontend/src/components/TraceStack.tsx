@@ -173,7 +173,7 @@ export function TraceStack({
     if (evalStart != null && evalStart > xOffset) {
       shapes.push({
         type: "rect", xref: "x", yref: (hasErr ? "y2 domain" : "y domain") as never, x0: xOffset, x1: evalStart, y0: 0, y1: 1,
-        fillcolor: "#5e6a85", opacity: 0.07, line: { width: 0 }, layer: "below",
+        fillcolor: C.dim, opacity: 0.07, line: { width: 0 }, layer: "below",
       });
     }
     if (highlight) {
@@ -211,16 +211,16 @@ export function TraceStack({
       xaxis: axis({
         anchor: hasErr ? "y3" : "y2",
         range: xRange ?? [xOffset, Math.max(xmax, (totalLength ?? 0) - 1 + xOffset * 0)],
-        showspikes: true, spikemode: "across", spikecolor: "#34426b", spikethickness: 1, spikedash: "solid",
+        showspikes: true, spikemode: "across", spikecolor: C.axis, spikethickness: 1, spikedash: "solid",
         title: { text: "Test-stream index (anonymised time)", font: { size: 11, color: C.muted }, standoff: 6 },
       }) as Layout["xaxis"],
       yaxis: axis({ domain: domains.y, title: { text: "Telemetry (scaled)", font: { size: 11, color: C.muted } } }) as Layout["yaxis"],
       yaxis2: hasErr
         ? (axis({ domain: domains.y2, ...(scoreMax ? { range: [0, scoreMax] } : { rangemode: "tozero" }), title: { text: "Score", font: { size: 11, color: C.muted } } }) as Layout["yaxis"])
-        : (axis({ domain: domains.y2, type: "category", showgrid: false, tickfont: { size: 10.5, color: C.muted },
+        : (axis({ domain: domains.y2, type: "category", showgrid: false, tickfont: { size: 11, color: C.muted },
             categoryorder: "array", categoryarray: ["Expert label", "Model detection"] }) as Layout["yaxis"]),
       ...(hasErr
-        ? { yaxis3: axis({ domain: domains.y3, type: "category", showgrid: false, tickfont: { size: 10.5, color: C.muted },
+        ? { yaxis3: axis({ domain: domains.y3, type: "category", showgrid: false, tickfont: { size: 11, color: C.muted },
             categoryorder: "array", categoryarray: ["Expert label", "Model detection"] }) as Layout["yaxis"] }
         : {}),
       shapes,

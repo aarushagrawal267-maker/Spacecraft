@@ -83,14 +83,14 @@ export default function DatasetExplorer() {
       >
         {ds.data.acquisition.running && (
           <div className="mb-4">
-            <div className="mb-1 text-[12.5px] text-ink-2">{ds.data.acquisition.message}</div>
+            <div className="mb-1 text-sm text-ink-2">{ds.data.acquisition.message}</div>
             <div className="h-1.5 overflow-hidden rounded bg-sunken"><div className="h-full bg-accent/70" style={{ width: `${ds.data.acquisition.progress * 100}%` }} /></div>
           </div>
         )}
         {ds.data.acquisition.result && !ds.data.acquisition.running && (
-          <div className="mb-4 space-y-1 text-[12.5px]">
+          <div className="mb-4 space-y-1 text-sm">
             {ds.data.acquisition.result.attempts.map((a, i) => (
-              <div key={i} className={a.ok ? "text-[#7ee07e]" : "text-muted"}>{a.ok ? "✓" : "✗"} {a.source}: {a.message}</div>
+              <div key={i} className={a.ok ? "text-good" : "text-muted"}>{a.ok ? "✓" : "✗"} {a.source}: {a.message}</div>
             ))}
           </div>
         )}
@@ -104,12 +104,12 @@ export default function DatasetExplorer() {
               <KV k="Labels SHA-256" v={snap.labels_sha256.slice(0, 24) + "…"} />
               <KV k="Dataset checksum" v={snap.dataset_checksum.slice(0, 24) + "…"} />
               <KV k="Files / size" v={`${snap.n_files} · ${fmtBytes(snap.total_bytes)}`} />
-              <KV k="Validation" v={<span className="inline-flex items-center gap-1.5 text-[#7ee07e]"><CheckCircle2 size={13} /> {snap.errors.length} errors · {snap.warnings.length} warnings</span>} mono={false} />
+              <KV k="Validation" v={<span className="inline-flex items-center gap-1.5 text-good"><CheckCircle2 size={13} /> {snap.errors.length} errors · {snap.warnings.length} warnings</span>} mono={false} />
             </div>
             <div className="space-y-2">
               <div className="eyebrow">Source notes & licensing</div>
-              <p className="text-[12.5px] leading-relaxed text-ink-2">{snap.provenance.source_note}</p>
-              <p className="text-[12.5px] leading-relaxed text-muted">{ds.data.license_note}</p>
+              <p className="text-sm leading-relaxed text-ink-2">{snap.provenance.source_note}</p>
+              <p className="text-sm leading-relaxed text-muted">{ds.data.license_note}</p>
             </div>
           </div>
         ) : (
@@ -120,7 +120,7 @@ export default function DatasetExplorer() {
       <Panel eyebrow="Integrity disclosures" title="What this benchmark is — and is not">
         <ul className="grid gap-2 md:grid-cols-2">
           {ds.data.disclosures.map((d) => (
-            <li key={d} className="flex gap-2 text-[12.5px] leading-relaxed text-ink-2"><span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-accent" />{d}</li>
+            <li key={d} className="flex gap-2 text-sm leading-relaxed text-ink-2"><span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-accent" />{d}</li>
           ))}
         </ul>
       </Panel>
@@ -188,9 +188,9 @@ export default function DatasetExplorer() {
       {snap && snap.warnings.length > 0 && (
         <Panel eyebrow="Data quality" title="Validation warnings">
           <ul className="grid gap-1.5 md:grid-cols-2">
-            {snap.warnings.map((w) => <li key={w} className="num text-[12px] text-ink-2">• {w}</li>)}
+            {snap.warnings.map((w) => <li key={w} className="num text-xs text-ink-2">• {w}</li>)}
           </ul>
-          <p className="mt-3 text-[12px] text-muted">No missing (non-finite) values were found in any file. Constant training channels are kept: the models then learn a constant, and any test deviation produces forecast error.</p>
+          <p className="mt-3 text-xs text-muted">No missing (non-finite) values were found in any file. Constant training channels are kept: the models then learn a constant, and any test deviation produces forecast error.</p>
         </Panel>
       )}
 
@@ -198,8 +198,8 @@ export default function DatasetExplorer() {
         actions={
           <div className="flex items-center gap-2">
             <Segmented size="sm" ariaLabel="Spacecraft filter" value={scFilter} onChange={setScFilter} options={[{ value: "ALL", label: "All" }, { value: "SMAP", label: "SMAP" }, { value: "MSL", label: "MSL" }]} />
-            <input aria-label="Search channels" placeholder="Search…" value={search} onChange={(e) => setSearch(e.target.value)} className="num h-7 w-28 rounded-md border border-edge bg-raised px-2 text-[12.5px] text-ink outline-none" />
-            <Select ariaLabel="Sort" value={sortKey} onChange={(v) => setSortKey(v as typeof sortKey)} className="h-7 text-[12px]">
+            <input aria-label="Search channels" placeholder="Search…" value={search} onChange={(e) => setSearch(e.target.value)} className="num h-7 w-28 rounded-md border border-edge bg-raised px-2 text-sm text-ink outline-none" />
+            <Select ariaLabel="Sort" value={sortKey} onChange={(v) => setSortKey(v as typeof sortKey)} className="h-7 text-xs">
               <option value="chan_id">Sort: channel</option>
               <option value="test_len">Sort: test length</option>
               <option value="train_len">Sort: train length</option>
@@ -210,9 +210,9 @@ export default function DatasetExplorer() {
         }
       >
         <div className="max-h-[560px] overflow-auto">
-          <table className="w-full text-[12.5px]">
+          <table className="w-full text-sm">
             <thead className="sticky top-0 bg-panel">
-              <tr className="text-left text-[11px] text-muted">
+              <tr className="text-left text-xs text-muted">
                 {["Channel", "Craft", "Train", "Test", "Features", "Labels", "Labelled", "Range", "Train σ", "Missing", "Notes"].map((h) => (
                   <th key={h} className="py-2 pr-3 font-medium">{h}</th>
                 ))}
@@ -231,7 +231,7 @@ export default function DatasetExplorer() {
                   <td className="num py-1.5 pr-3 text-ink-2">{fmtNum(c.value_min, 2)} … {fmtNum(c.value_max, 2)}</td>
                   <td className="num py-1.5 pr-3">{fmtNum(c.train_std, 3)}</td>
                   <td className="num py-1.5 pr-3">{nonfinite.has(c.chan_id) ? nonfinite.get(c.chan_id) : "—"}</td>
-                  <td className="py-1.5 text-[11.5px] text-warn">{c.issues.join("; ")}</td>
+                  <td className="py-1.5 text-xs text-warn">{c.issues.join("; ")}</td>
                 </tr>
               ))}
             </tbody>

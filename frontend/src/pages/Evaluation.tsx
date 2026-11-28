@@ -29,7 +29,7 @@ function ConfusionMatrix({ a }: { a: Aggregate }) {
         z: z.map((r) => r.map((v) => Math.log10(v + 1))),
         x: ["Flagged", "Not flagged"],
         y: ["Labelled anomaly", "Not labelled"],
-        colorscale: [[0, "#0f1629"], [0.5, "#256abf"], [1, "#86b6ef"]],
+        colorscale: [[0, C.raised], [0.5, "#256abf"], [1, "#86b6ef"]],
         showscale: false,
         customdata: z as never,
         hovertemplate: "%{y} / %{x}: %{customdata:,}<extra></extra>",
@@ -43,7 +43,7 @@ function ConfusionMatrix({ a }: { a: Aggregate }) {
         annotations: [0, 1].flatMap((i) => [0, 1].map((j) => ({
           x: ["Flagged", "Not flagged"][j], y: ["Labelled anomaly", "Not labelled"][i],
           text: `<b>${fmtInt(z[i][j])}</b><br><span style="font-size:10px">${fmtPct(z[i][j] / total)}</span>`,
-          showarrow: false, font: { family: "IBM Plex Mono", size: 13, color: Math.log10(z[i][j] + 1) > 3.5 ? "#05070d" : C.ink },
+          showarrow: false, font: { family: "IBM Plex Mono", size: 13, color: Math.log10(z[i][j] + 1) > 3.5 ? C.sunken : C.ink },
         }))),
       })}
     />
@@ -116,7 +116,7 @@ export default function Evaluation() {
             const on = ids.includes(e.id);
             return (
               <button key={e.id} onClick={() => toggle(e.id)} aria-pressed={on}
-                className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-[12px] ${on ? "border-edge bg-raised text-ink" : "border-hairline text-muted hover:text-ink"}`}>
+                className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs ${on ? "border-edge bg-raised text-ink" : "border-hairline text-muted hover:text-ink"}`}>
                 <span className="h-2 w-2 rounded-sm" style={{ background: on ? METHOD_COLOR[e.method] : "transparent", border: `1px solid ${METHOD_COLOR[e.method]}` }} />
                 #{e.id} {e.method_label}{e.profile ? ` · ${e.profile}` : ""} · {e.spacecraft === "ALL" ? "81 ch" : `${e.n_channels} ch`}
               </button>
@@ -154,9 +154,9 @@ export default function Evaluation() {
             </Panel>
             <Panel eyebrow="Table view" title="Same figures, exact values">
               <div className="overflow-x-auto">
-                <table className="w-full text-[12.5px]">
+                <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-left text-[11px] text-muted">
+                    <tr className="text-left text-xs text-muted">
                       <th className="py-1.5 pr-2 font-medium">Method</th>
                       {protocol === "event" ? ["TP", "FP", "FN", "P", "R", "F1", "F0.5", "FA/10k"].map((h) => <th key={h} className="py-1.5 pr-2 text-right font-medium">{h}</th>)
                         : ["TP", "FP", "FN", "TN", "P", "R", "F1", "FPR"].map((h) => <th key={h} className="py-1.5 pr-2 text-right font-medium">{h}</th>)}
@@ -211,7 +211,7 @@ export default function Evaluation() {
                     xaxis: axis({ range: [0, 1], title: { text: kind === "pr" ? "Recall" : "False positive rate" } }),
                     yaxis: axis({ range: [0, 1.02], title: { text: kind === "pr" ? "Precision" : "True positive rate" } }) })}
                 />
-                <p className="mt-1 text-[11.5px] text-dim">
+                <p className="mt-1 text-xs text-dim">
                   {kind === "pr" ? "Dotted line: share of labelled points (a random score's expected precision). " : "Dotted line: chance. "}
                   Curves sweep one global cut-off over each channel's standardised smoothed score — the dynamic threshold itself is not a single global cut-off.
                 </p>
@@ -230,13 +230,13 @@ export default function Evaluation() {
                   marker: { color: sc === "SMAP" ? "#3987e5" : "#d95926", line: { color: C.panel, width: 2 } },
                   hovertemplate: `${sc} · %{x}: %{y:.3f}<extra></extra>`,
                 }))}
-                layout={baseLayout({ barmode: "group", margin: { l: 44, r: 8, t: 6, b: 90 }, xaxis: axis({ tickangle: -25, tickfont: { size: 10.5, color: C.ink2, family: "IBM Plex Sans" } }), yaxis: axis({ range: [0, 1], dtick: 0.25 }) })}
+                layout={baseLayout({ barmode: "group", margin: { l: 44, r: 8, t: 6, b: 90 }, xaxis: axis({ tickangle: -25, tickfont: { size: 11, color: C.ink2, family: "IBM Plex Sans" } }), yaxis: axis({ range: [0, 1], dtick: 0.25 }) })}
               />
             </Panel>
             <Panel eyebrow="Detection quality" title="Delay, overlap and anomaly classes (event-wise)">
-              <table className="w-full text-[12.5px]">
+              <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-left text-[11px] text-muted">
+                  <tr className="text-left text-xs text-muted">
                     <th className="py-1.5 pr-2 font-medium">Method</th>
                     <th className="py-1.5 pr-2 text-right font-medium">Mean delay</th>
                     <th className="py-1.5 pr-2 text-right font-medium">Median delay</th>
@@ -262,25 +262,25 @@ export default function Evaluation() {
                   })}
                 </tbody>
               </table>
-              <p className="mt-3 text-[11.5px] leading-relaxed text-dim">Delay = first detected index inside a detected label minus the label start, in timesteps (0 if the detection began earlier). IoU = overlap of a detected label with the union of its overlapping detections.</p>
+              <p className="mt-3 text-xs leading-relaxed text-dim">Delay = first detected index inside a detected label minus the label start, in timesteps (0 if the detection began earlier). IoU = overlap of a detected label with the union of its overlapping detections.</p>
             </Panel>
           </div>
 
           {focusExp && agg(focusExp, scope) && (
             <div className="grid gap-6 xl:grid-cols-[420px_1fr]">
-              <Panel eyebrow="Point-wise confusion matrix" title={<Select ariaLabel="Experiment" value={String(focus)} onChange={(v) => setFocus(Number(v))} className="h-8 text-[12.5px]">{list.map((e) => <option key={e.id} value={e.id}>{shortLabel(e)}</option>)}</Select>}>
+              <Panel eyebrow="Point-wise confusion matrix" title={<Select ariaLabel="Experiment" value={String(focus)} onChange={(v) => setFocus(Number(v))} className="h-8 text-sm">{list.map((e) => <option key={e.id} value={e.id}>{shortLabel(e)}</option>)}</Select>}>
                 <ConfusionMatrix a={agg(focusExp, scope)!} />
-                <p className="mt-1 text-[11.5px] text-dim">Cell shading is log-scaled; counts are exact. Evaluated points: {fmtInt(agg(focusExp, scope)!.n_evaluated)}.</p>
+                <p className="mt-1 text-xs text-dim">Cell shading is log-scaled; counts are exact. Evaluated points: {fmtInt(agg(focusExp, scope)!.n_evaluated)}.</p>
               </Panel>
               <Panel eyebrow="Per channel" title={`${focusExp.name}`} actions={
-                <div className="flex gap-3 text-[12px]">
+                <div className="flex gap-3 text-xs">
                   <a className="inline-flex items-center gap-1 text-accent hover:underline" href={exportUrl(`/export/experiments/${focusExp.id}/channels.csv`)}><Download size={12} /> CSV</a>
                   <a className="inline-flex items-center gap-1 text-accent hover:underline" href={exportUrl(`/export/experiments/${focusExp.id}.json`)}><Download size={12} /> JSON</a>
                 </div>}>
                 <div className="max-h-[360px] overflow-auto">
-                  <table className="w-full text-[12.5px]">
+                  <table className="w-full text-sm">
                     <thead className="sticky top-0 bg-panel">
-                      <tr className="text-left text-[11px] text-muted">
+                      <tr className="text-left text-xs text-muted">
                         {["Channel", "Craft", "TP", "FP", "FN", "Event F1", "Point F1", "AP", "Train", "Infer"].map((h) => <th key={h} className="py-1.5 pr-2 font-medium">{h}</th>)}
                       </tr>
                     </thead>
@@ -307,9 +307,9 @@ export default function Evaluation() {
           )}
 
           <Panel eyebrow="Cost" title="Training and inference time">
-            <table className="w-full text-[12.5px]">
+            <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-[11px] text-muted">
+                <tr className="text-left text-xs text-muted">
                   {["Experiment", "Origin", "Device", "Channels", "Total training", "Total inference", "Per channel (train)"].map((h) => <th key={h} className="py-1.5 pr-3 font-medium">{h}</th>)}
                 </tr>
               </thead>
@@ -327,7 +327,7 @@ export default function Evaluation() {
                 ))}
               </tbody>
             </table>
-            <p className="mt-3 text-[11.5px] text-dim">
+            <p className="mt-3 text-xs text-dim">
               Paper figures (Hundman et al.: overall precision 87.5%, recall 80.0%) are not shown as a comparison: preprocessing details,
               the training setup and the thresholding implementation differ, so the numbers are not directly comparable.
             </p>

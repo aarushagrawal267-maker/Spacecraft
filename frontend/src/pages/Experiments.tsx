@@ -43,9 +43,9 @@ export default function Experiments() {
           <div className="p-5"><EmptyState title="No experiments" action={<Link to="/lab"><Button variant="primary">Open Model Laboratory</Button></Link>} /></div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-[12.5px]">
+            <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-hairline text-left text-[11px] text-muted">
+                <tr className="border-b border-hairline text-left text-xs text-muted">
                   <th className="w-10 px-5 py-2" />
                   {["#", "Name", "Method", "Scope", "Status", "Event P", "Event R", "F0.5", "Point F1", "Train time", "Created", ""].map((h) => (
                     <th key={h} className="py-2 pr-3 font-medium">{h}</th>
@@ -62,7 +62,7 @@ export default function Experiments() {
                         checked={sel.includes(e.id)}
                         disabled={!["completed", "partial"].includes(e.status)}
                         onChange={() => setSel((s) => (s.includes(e.id) ? s.filter((x) => x !== e.id) : [...s, e.id]))}
-                        className="accent-[#4d7cfe]"
+                        className="accent-accent"
                       />
                     </td>
                     <td className="num py-2 pr-3 text-muted">{e.id}</td>
@@ -82,7 +82,7 @@ export default function Experiments() {
                     <td className="py-2 pr-5 text-right">
                       <button
                         aria-label={`Delete experiment ${e.id}`}
-                        className="text-dim hover:text-[#f07070] disabled:opacity-30"
+                        className="text-dim hover:text-critical-ink disabled:opacity-30"
                         disabled={["running", "queued"].includes(e.status)}
                         onClick={() => {
                           if (!window.confirm(`Delete experiment #${e.id} (${e.name}) and its local model files?`)) return;

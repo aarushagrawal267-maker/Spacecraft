@@ -18,13 +18,13 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         {toasts.map((t) => (
           <div key={t.id} className="pointer-events-auto flex items-start gap-3 rounded-lg border border-edge bg-raised px-4 py-3 shadow-2xl">
             {t.tone === "success" ? (
-              <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-[#3fd23f]" />
+              <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-good" />
             ) : (
-              <XCircle size={16} className="mt-0.5 shrink-0 text-[#f07070]" />
+              <XCircle size={16} className="mt-0.5 shrink-0 text-critical-ink" />
             )}
             <div className="min-w-0 flex-1">
-              <div className="text-[13px] font-semibold text-ink">{t.title}</div>
-              {t.body && <div className="mt-0.5 text-[12.5px] text-muted">{t.body}</div>}
+              <div className="text-sm font-medium text-ink">{t.title}</div>
+              {t.body && <div className="mt-0.5 text-sm text-muted">{t.body}</div>}
             </div>
             <button aria-label="Dismiss" className="text-dim hover:text-ink" onClick={() => setToasts((p) => p.filter((x) => x.id !== t.id))}>
               <X size={14} />

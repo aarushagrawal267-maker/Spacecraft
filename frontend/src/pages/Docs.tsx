@@ -28,7 +28,7 @@ export default function Docs() {
       <div className="grid gap-10 lg:grid-cols-[200px_1fr]">
         <nav className="sticky top-4 hidden self-start lg:block" aria-label="Sections">
           {SECTIONS.map(([id, label]) => (
-            <a key={id} href={`#${id}`} className="block border-l border-hairline py-1.5 pl-3 text-[12.5px] text-muted hover:border-accent hover:text-ink">
+            <a key={id} href={`#${id}`} className="block border-l border-hairline py-1.5 pl-3 text-sm text-muted hover:border-accent hover:text-ink">
               {label}
             </a>
           ))}

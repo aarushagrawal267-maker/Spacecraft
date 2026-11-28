@@ -20,7 +20,7 @@ function MetricsBlock({ s, unscoreable }: { s: Series["metrics"] | undefined; un
   return (
     <div className="grid gap-6 md:grid-cols-2">
       <div>
-        <div className="eyebrow mb-1.5">Event-wise (labelled sequences)</div>
+        <div className="eyebrow mb-2">Event-wise (labelled sequences)</div>
         <KV k="Labelled sequences detected (TP)" v={`${e.tp} / ${e.n_labels}`} />
         <KV k="Detections without label overlap (FP)" v={e.fp} />
         <KV k="Missed sequences (FN)" v={e.fn} />
@@ -30,7 +30,7 @@ function MetricsBlock({ s, unscoreable }: { s: Series["metrics"] | undefined; un
         <KV k="Mean detection delay" v={e.mean_delay == null ? "—" : `${fmtNum(e.mean_delay, 0)} steps`} />
       </div>
       <div>
-        <div className="eyebrow mb-1.5">Point-wise (every evaluated timestep)</div>
+        <div className="eyebrow mb-2">Point-wise (every evaluated timestep)</div>
         <KV k="TP / FP" v={`${fmtInt(p.tp)} / ${fmtInt(p.fp)}`} />
         <KV k="FN / TN" v={`${fmtInt(p.fn)} / ${fmtInt(p.tn)}`} />
         <KV k="Precision" v={fmtPct(p.precision)} />
@@ -136,8 +136,8 @@ export default function DetectionCentre() {
         <>
           <Panel>
             <div className="flex flex-wrap items-end gap-x-6 gap-y-4 pt-4">
-              <div>
-                <div className="eyebrow mb-1.5">Trained model</div>
+              <div className="min-w-0 max-w-full">
+                <div className="eyebrow mb-2">Trained model</div>
                 <RunPicker
                   chan={chan}
                   runId={runId}
@@ -149,7 +149,7 @@ export default function DetectionCentre() {
                 />
               </div>
               <div>
-                <div className="eyebrow mb-1.5">Threshold</div>
+                <div className="eyebrow mb-2">Threshold</div>
                 <Segmented
                   ariaLabel="Threshold mode"
                   value={thrMode}
@@ -162,20 +162,20 @@ export default function DetectionCentre() {
               </div>
               {thrMode === "ndt" ? (
                 <>
-                  <label className="text-[12px] text-muted">
-                    <div className="eyebrow mb-1.5">Pruning p</div>
+                  <label className="text-xs text-muted">
+                    <div className="eyebrow mb-2">Pruning p</div>
                     <input type="number" step={0.01} min={0} max={1} value={p} onChange={(e) => setP(Number(e.target.value))}
                       className="num h-9 w-24 rounded-md border border-edge bg-raised px-2 text-ink" />
                   </label>
-                  <label className="text-[12px] text-muted">
-                    <div className="eyebrow mb-1.5">Error buffer</div>
+                  <label className="text-xs text-muted">
+                    <div className="eyebrow mb-2">Error buffer</div>
                     <input type="number" step={10} min={0} max={500} value={buffer} onChange={(e) => setBuffer(Number(e.target.value))}
                       className="num h-9 w-24 rounded-md border border-edge bg-raised px-2 text-ink" />
                   </label>
                 </>
               ) : (
-                <label className="text-[12px] text-muted">
-                  <div className="eyebrow mb-1.5">k (training σ)</div>
+                <label className="text-xs text-muted">
+                  <div className="eyebrow mb-2">k (training σ)</div>
                   <input type="number" step={0.5} min={0.5} max={20} value={k} onChange={(e) => setK(Number(e.target.value))}
                     className="num h-9 w-24 rounded-md border border-edge bg-raised px-2 text-ink" />
                 </label>
@@ -217,7 +217,7 @@ export default function DetectionCentre() {
             }
             actions={
               live?.timing_ms && (
-                <span className="num text-[12px] text-muted">
+                <span className="num text-xs text-muted">
                   model {fmtNum(live.timing_ms.score / 1000, 2)} s · threshold {fmtNum(live.timing_ms.threshold, 0)} ms · {live.device}
                 </span>
               )
@@ -255,7 +255,7 @@ export default function DetectionCentre() {
                   predictionLabel={isLstm ? "LSTM forecast" : "Prediction"}
                   onSelectDetection={(d) => d.id && nav(`/investigate/${d.id}`)}
                 />
-                <p className="mt-2 text-[12px] text-muted">
+                <p className="mt-2 text-xs text-muted">
                   Drag to zoom (double-click to reset). Click a violet bar in the lane to investigate it. The grey region before index{" "}
                   {s.eval_start} is not scored.
                 </p>
@@ -267,9 +267,9 @@ export default function DetectionCentre() {
             <div className="grid gap-6 xl:grid-cols-[1.1fr_1fr]">
               <Panel eyebrow="Detected intervals" title="Model detections">
                 {s.detections.length ? (
-                  <table className="w-full text-[13px]">
+                  <table className="w-full text-sm">
                     <thead>
-                      <tr className="text-left text-[11.5px] text-muted">
+                      <tr className="text-left text-xs text-muted">
                         <th className="py-1.5 font-medium">Start–end</th>
                         <th className="py-1.5 text-right font-medium">Length</th>
                         <th className="py-1.5 text-right font-medium">Score</th>
@@ -288,9 +288,9 @@ export default function DetectionCentre() {
                           <td className="py-1.5"><OutcomeTag outcome={d.outcome} /></td>
                           <td className="py-1.5 text-right">
                             {d.id ? (
-                              <Link to={`/investigate/${d.id}`} className="text-[12.5px] text-accent hover:underline">Investigate</Link>
+                              <Link to={`/investigate/${d.id}`} className="text-sm text-accent hover:underline">Investigate</Link>
                             ) : (
-                              <span className="text-[11.5px] text-dim" title="Live inference results are not stored">not stored</span>
+                              <span className="text-xs text-dim" title="Live inference results are not stored">not stored</span>
                             )}
                           </td>
                         </tr>
@@ -298,9 +298,9 @@ export default function DetectionCentre() {
                     </tbody>
                   </table>
                 ) : (
-                  <p className="text-[13px] text-muted">The model flagged no interval on this channel.</p>
+                  <p className="text-sm text-muted">The model flagged no interval on this channel.</p>
                 )}
-                <p className="mt-3 text-[11.5px] leading-relaxed text-dim">
+                <p className="mt-3 text-xs leading-relaxed text-dim">
                   Score = margin of the smoothed error above the window threshold ÷ (window mean + sd). It indicates severity; it is not a
                   calibrated probability.
                 </p>
@@ -309,7 +309,8 @@ export default function DetectionCentre() {
                 {labelStatus.length > 0 && (
                   <div className="mb-4 flex flex-wrap gap-2">
                     {labelStatus.map((l) => (
-                      <span key={l.start} className={`num rounded border px-2 py-0.5 text-[12px] ${l.detected ? "border-detect/60 text-ink" : "border-label/50 text-ink-2"}`}>
+                      <span key={l.start} className={`num inline-flex items-center gap-2 rounded border px-2 py-1 text-xs ${l.detected ? "border-detect/60 text-ink" : "border-hairline text-ink-2"}`}>
+                        <span className="hatch-label inline-block h-2.5 w-2.5 rounded-sm border border-label/60" aria-hidden />
                         {l.start}–{l.end} · {l.cls} · {l.detected ? `detected (delay ${l.delay})` : "missed"}
                       </span>
                     ))}
