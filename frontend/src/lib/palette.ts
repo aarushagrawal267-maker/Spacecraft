@@ -1,21 +1,24 @@
-// Data colours. Validated with the dataviz palette validator on the panel surface #0B1020.
+// Data colours. Validated with the dataviz palette validator on a dark panel surface.
+// Chart chrome (ink, grid, axis, panel) follows the graphite interface ramp in styles.css.
 export const C = {
   actual: "#199e9e", // actual telemetry (teal)
-  prediction: "#d9deea", // model forecast — neutral ink so it never competes on hue
+  prediction: "#dcdcdf", // model forecast — neutral ink so it never competes on hue
   detect: "#9085e9", // model-detected anomaly
   label: "#c98500", // expert-labelled anomaly (always hatched as well)
-  raw: "#5e6a85",
-  smoothed: "#e6ebf5",
+  raw: "#66666d",
+  smoothed: "#ededed",
   threshold: "#9085e9",
-  ink: "#e6ebf5",
-  ink2: "#b8c1d6",
-  muted: "#8491ab",
-  dim: "#5e6a85",
-  grid: "#1a2238",
-  axis: "#263152",
-  panel: "#0b1020",
+  ink: "#ededed",
+  ink2: "#b9b9be",
+  muted: "#8b8b92",
+  dim: "#66666d",
+  grid: "#29292c",
+  axis: "#3a3a3e",
+  panel: "#18181a",
+  raised: "#222224",
+  sunken: "#0d0d0e",
   accent: "#4cc9f0",
-  good: "#0ca30c",
+  good: "#4cc38a",
   warn: "#fab219",
   serious: "#ec835a",
   critical: "#d03b3b",
