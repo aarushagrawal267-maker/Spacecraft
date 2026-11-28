@@ -22,7 +22,7 @@ function Distribution({ values, labels }: { values: (number | null)[]; labels: L
     });
     return { inside: ins, outside: out };
   }, [values, labels]);
-  if (!inside.length) return <p className="text-[13px] text-muted">This channel has no labelled test points to compare.</p>;
+  if (!inside.length) return <p className="text-sm text-muted">This channel has no labelled test points to compare.</p>;
   return (
     <>
       <Legend
@@ -148,7 +148,7 @@ export default function TelemetryExplorer() {
                     <Notice tone="warn">{channel.issues.join("; ")}</Notice>
                   </div>
                 )}
-                <p className="mt-3 text-[11.5px] leading-relaxed text-dim">
+                <p className="mt-3 text-xs leading-relaxed text-dim">
                   The type letter is the only documented part of an anonymised ID (e.g. P = power, R = radiation); other letters are not
                   interpreted here.
                 </p>
@@ -176,9 +176,9 @@ export default function TelemetryExplorer() {
         <div className="grid gap-6 xl:grid-cols-[1fr_1fr]">
           <Panel eyebrow="Reference annotations" title="Expert-labelled anomaly sequences">
             {tel.data.labels.length ? (
-              <table className="w-full text-[13px]">
+              <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-left text-[11.5px] text-muted">
+                  <tr className="text-left text-xs text-muted">
                     <th className="py-1.5 font-medium">Start</th>
                     <th className="py-1.5 font-medium">End</th>
                     <th className="py-1.5 font-medium">Length</th>
@@ -193,9 +193,10 @@ export default function TelemetryExplorer() {
                       <td className="num py-1.5">{l.end}</td>
                       <td className="num py-1.5">{l.end - l.start + 1}</td>
                       <td className="py-1.5">
+                        <span className="hatch-label mr-2 inline-block h-2.5 w-2.5 rounded-sm border border-label/60 align-[-1px]" aria-hidden />
                         {l.cls}
                         {l.merged_from && l.merged_from.length > 0 && (
-                          <span className="ml-2 text-[11.5px] text-warn" title={`Merged from ${JSON.stringify(l.merged_from)}`}>
+                          <span className="ml-2 text-xs text-warn" title={`Merged from ${JSON.stringify(l.merged_from)}`}>
                             merged from {l.merged_from.length} rows
                           </span>
                         )}
@@ -210,9 +211,9 @@ export default function TelemetryExplorer() {
                 </tbody>
               </table>
             ) : (
-              <p className="text-[13px] text-muted">No labelled sequences.</p>
+              <p className="text-sm text-muted">No labelled sequences.</p>
             )}
-            <p className="mt-3 text-[12px] text-muted">
+            <p className="mt-3 text-xs text-muted">
               Labels are benchmark reference intervals, not confirmed hardware failures.{" "}
               <Link to={`/detect?chan=${chan}`} className="text-accent hover:underline">
                 Compare with model detections →

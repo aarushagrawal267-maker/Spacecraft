@@ -2,28 +2,29 @@
 
 /*
  * Heliograph design tokens.
- * Data colours were validated with the dataviz palette validator against the
- * panel surface (#0B1020): actual telemetry / model detection / expert label
- * pass every check on all pairs; the method palette passes on adjacent pairs.
- * The product is dark by design (mission-control environment).
+ * Surfaces are a plain graphite ramp (night-shift operations console); colour is
+ * kept for the data. Data colours were validated with the dataviz palette
+ * validator against a dark panel surface of the same luminance: actual
+ * telemetry / model detection / expert label pass every check on all pairs; the
+ * method palette passes on adjacent pairs.
  */
 @theme {
   --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
 
-  --color-void: #05070d;
-  --color-panel: #0b1020;
-  --color-raised: #0f1629;
-  --color-sunken: #080c18;
-  --color-hairline: #1a2238;
-  --color-edge: #263152;
-  --color-ink: #e6ebf5;
-  --color-ink-2: #b8c1d6;
-  --color-muted: #8491ab;
-  --color-dim: #5e6a85;
+  --color-void: #111112;
+  --color-panel: #18181a;
+  --color-raised: #222224;
+  --color-sunken: #0d0d0e;
+  --color-hairline: #29292c;
+  --color-edge: #3a3a3e;
+  --color-ink: #ededed;
+  --color-ink-2: #b9b9be;
+  --color-muted: #8b8b92;
+  --color-dim: #66666d;
 
   --color-accent: #4cc9f0;
-  --color-signal: #4d7cfe;
+  --color-accent-ink: #062330;
 
   /* data roles */
   --color-actual: #199e9e;
@@ -31,10 +32,28 @@
   --color-label: #c98500;
 
   /* status (always paired with icon + text) */
-  --color-good: #0ca30c;
+  --color-good: #4cc38a;
   --color-warn: #fab219;
   --color-serious: #ec835a;
   --color-critical: #d03b3b;
+  /* readable text tints of the status hues on dark surfaces */
+  --color-critical-ink: #f08a8a;
+
+  /* type scale: 12 / 13 / 14 / 16 / 20 / 24 / 28 */
+  --text-xs: 12px;
+  --text-xs--line-height: 16px;
+  --text-sm: 13px;
+  --text-sm--line-height: 20px;
+  --text-base: 14px;
+  --text-base--line-height: 20px;
+  --text-lg: 16px;
+  --text-lg--line-height: 24px;
+  --text-xl: 20px;
+  --text-xl--line-height: 28px;
+  --text-2xl: 24px;
+  --text-2xl--line-height: 32px;
+  --text-3xl: 28px;
+  --text-3xl--line-height: 36px;
 }
 
 :root {
@@ -58,11 +77,11 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Faint graticule behind the workspace — the platform's "plotting paper" signature. */
+/* Faint dotted graticule behind the workspace, like plotting paper. */
 .graticule {
   background-color: var(--color-void);
   background-image:
-    radial-gradient(circle at 1px 1px, rgba(132, 145, 171, 0.07) 1px, transparent 0);
+    radial-gradient(circle at 1px 1px, rgba(237, 237, 237, 0.05) 1px, transparent 0);
   background-size: 24px 24px;
 }
 
@@ -72,18 +91,22 @@ body {
 }
 
 .eyebrow {
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-size: 12px;
+  line-height: 16px;
   color: var(--color-muted);
   font-weight: 500;
 }
 
 .panel {
+  min-width: 0;
   background: var(--color-panel);
   border: 1px solid var(--color-hairline);
   border-radius: 10px;
 }
+
+/* Grid and flex children may shrink below their content; wide tables scroll inside panels. */
+.grid > * { min-width: 0; }
+.panel-body { overflow-x: auto; }
 
 .hairline-b {
   border-bottom: 1px solid var(--color-hairline);
@@ -102,7 +125,7 @@ body {
 /* Scrollbars */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #263152 transparent;
+  scrollbar-color: var(--color-edge) transparent;
 }
 
 /* Loading shimmer (held content uses opacity instead to avoid layout jumps) */
@@ -111,7 +134,7 @@ body {
   100% { background-position: 400px 0; }
 }
 .skeleton {
-  background: linear-gradient(90deg, #0f1629 0px, #141d35 160px, #0f1629 320px);
+  background: linear-gradient(90deg, var(--color-raised) 0px, #2a2a2d 160px, var(--color-raised) 320px);
   background-size: 800px 100%;
   animation: shimmer 1.6s linear infinite;
   border-radius: 6px;
@@ -128,7 +151,8 @@ body {
   * { transition: none !important; }
 }
 
-/* Hatched fill for expert-label markers in HTML (mirrors the chart pattern) */
+/* Signature: hatched amber marker for expert labels, in HTML and charts alike.
+   Use it wherever an expert label appears and nowhere else. */
 .hatch-label {
   background-image: repeating-linear-gradient(
     135deg,
@@ -138,19 +162,21 @@ body {
 }
 
 .js-plotly-plot .plotly .modebar { background: transparent !important; }
-.js-plotly-plot .plotly .modebar-btn path { fill: #5e6a85 !important; }
+.js-plotly-plot .plotly .modebar-btn path { fill: var(--color-dim) !important; }
 .js-plotly-plot .plotly .modebar-btn:hover path,
-.js-plotly-plot .plotly .modebar-btn.active path { fill: #e6ebf5 !important; }
+.js-plotly-plot .plotly .modebar-btn.active path { fill: var(--color-ink) !important; }
 
 /* Long-form documentation */
-.prose-doc h2 { font-size: 20px; font-weight: 600; margin: 28px 0 10px; color: var(--color-ink); }
-.prose-doc h3 { font-size: 15px; font-weight: 600; margin: 20px 0 6px; color: var(--color-ink); }
+.prose-doc h2 { font-size: 20px; line-height: 28px; font-weight: 500; margin: 32px 0 12px; color: var(--color-ink); }
+.prose-doc h3 { font-size: 16px; line-height: 24px; font-weight: 500; margin: 20px 0 8px; color: var(--color-ink); }
 .prose-doc p, .prose-doc li { color: var(--color-ink-2); line-height: 1.7; }
 .prose-doc p { margin: 8px 0; }
 .prose-doc ul { list-style: disc; padding-left: 20px; margin: 8px 0; }
 .prose-doc ol { list-style: decimal; padding-left: 20px; margin: 8px 0; }
-.prose-doc code { font-family: var(--font-mono); font-size: 12.5px; background: #0f1629; border: 1px solid #1a2238; padding: 1px 5px; border-radius: 4px; color: #e6ebf5; }
+.prose-doc code { font-family: var(--font-mono); font-size: 12px; background: var(--color-raised); border: 1px solid var(--color-hairline); padding: 1px 4px; border-radius: 4px; color: var(--color-ink); }
 .prose-doc a { color: var(--color-accent); text-decoration: underline; text-underline-offset: 3px; }
 .prose-doc table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
-.prose-doc th, .prose-doc td { border-bottom: 1px solid #1a2238; padding: 6px 8px; text-align: left; color: var(--color-ink-2); }
+.prose-doc th, .prose-doc td { border-bottom: 1px solid var(--color-hairline); padding: 6px 8px; text-align: left; color: var(--color-ink-2); }
 .prose-doc th { color: var(--color-muted); font-weight: 500; }
+
+strong, b { font-weight: 600; }

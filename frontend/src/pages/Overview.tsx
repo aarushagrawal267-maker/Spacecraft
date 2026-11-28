@@ -11,16 +11,14 @@ import { useSelection } from "../lib/selection";
 function MissionCard({ sc, d }: { sc: "SMAP" | "MSL"; d?: { channels: number; test_values: number; train_values: number; label_sequences: number } }) {
   const info = SPACECRAFT_INFO[sc];
   return (
-    <Panel className="relative overflow-hidden">
-      <div className="pointer-events-none absolute -top-16 -right-16 h-48 w-48 rounded-full border border-hairline" aria-hidden />
-      <div className="pointer-events-none absolute -top-6 -right-6 h-28 w-28 rounded-full border border-hairline/70" aria-hidden />
-      <div className="relative pt-4">
+    <Panel>
+      <div className="pt-4">
         <div className="eyebrow flex items-center gap-2">
-          <Satellite size={12} /> {info.kind}
+          <Satellite size={16} strokeWidth={1.5} /> {info.kind}
         </div>
-        <div className="mt-2 text-[20px] font-semibold tracking-tight text-ink">{info.name}</div>
-        <p className="mt-1.5 max-w-md text-[13px] leading-relaxed text-muted">{info.blurb}</p>
-        <div className="mt-5 grid grid-cols-4 gap-4">
+        <div className="mt-2 text-xl font-medium text-ink">{info.name}</div>
+        <p className="mt-1.5 max-w-md text-sm leading-relaxed text-muted">{info.blurb}</p>
+        <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
           <Stat label="Channels" value={fmtInt(d?.channels)} />
           <Stat label="Label seq." value={fmtInt(d?.label_sequences)} />
           <Stat label="Train values" value={fmtInt(d?.train_values)} />
@@ -34,12 +32,13 @@ function MissionCard({ sc, d }: { sc: "SMAP" | "MSL"; d?: { channels: number; te
 function Leaderboard({ rows }: { rows: Experiment[] }) {
   const sorted = [...rows].sort((a, b) => METHOD_ORDER.indexOf(a.method) - METHOD_ORDER.indexOf(b.method));
   const chartRows = sorted.filter((r) => r.headline.event_f0_5 != null);
+  const narrow = typeof window !== "undefined" && window.innerWidth < 640;
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
       <div className="overflow-x-auto">
-        <table className="w-full text-[13px]">
+        <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-[11.5px] text-muted">
+            <tr className="text-left text-xs text-muted">
               <th className="py-2 pr-3 font-medium">Method</th>
               <th className="py-2 pr-3 text-right font-medium">Event P</th>
               <th className="py-2 pr-3 text-right font-medium">Event R</th>
@@ -72,10 +71,10 @@ function Leaderboard({ rows }: { rows: Experiment[] }) {
             ))}
           </tbody>
         </table>
-        <p className="mt-3 text-[12px] leading-relaxed text-muted">
+        <p className="mt-3 text-xs leading-relaxed text-muted">
           Event-wise metrics follow the protocol of Hundman et al.; point-wise F1 counts every evaluated timestep without point
           adjustment. Values are computed by this application on test indices ≥ 250 of all 81 channels and are{" "}
-          <em>not</em> directly comparable with the paper (different preprocessing details and implementation).
+          not directly comparable with the paper (different preprocessing details and implementation).
         </p>
       </div>
       <div>
@@ -97,9 +96,9 @@ function Leaderboard({ rows }: { rows: Experiment[] }) {
             },
           ]}
           layout={baseLayout({
-            margin: { l: 160, r: 40, t: 4, b: 28 },
-            xaxis: axis({ range: [0, 1], dtick: 0.25 }),
-            yaxis: axis({ autorange: "reversed", showline: false, ticks: "", ticksuffix: "   ", tickfont: { size: 11.5, color: C.ink2, family: "IBM Plex Sans" } }),
+            margin: { l: narrow ? 120 : 160, r: 40, t: 4, b: 28 },
+            xaxis: axis({ range: [0, 1], dtick: narrow ? 0.5 : 0.25 }),
+            yaxis: axis({ autorange: "reversed", showline: false, ticks: "", ticksuffix: "  ", tickfont: { size: narrow ? 11 : 12, color: C.ink2, family: "IBM Plex Sans" } }),
           })}
         />
       </div>
@@ -138,16 +137,16 @@ function ChannelMap({ channels, runs, exp }: { channels: Channel[]; runs: RunSum
                           : `${c.chan_id}: no result for this method yet`
                       }
                     >
-                      <div className="num text-[12px] text-ink-2 group-hover:text-ink">{c.chan_id}</div>
-                      <div className="mt-1 flex flex-wrap gap-[3px]">
+                      <div className="num text-xs text-ink-2 group-hover:text-ink">{c.chan_id}</div>
+                      <div className="mt-1 flex flex-wrap gap-1">
                         {Array.from({ length: c.n_intervals }).map((_, i) => (
                           <span
                             key={i}
-                            className={`h-2 w-2 rounded-[2px] ${i < tp ? "bg-detect" : "hatch-label border border-label/60"}`}
+                            className={`h-2 w-2 rounded-xs ${i < tp ? "bg-detect" : "hatch-label border border-label/60"}`}
                           />
                         ))}
                         {Array.from({ length: Math.min(fp, 6) }).map((_, i) => (
-                          <span key={`fp${i}`} className="h-2 w-2 rounded-[2px] border border-detect/70" />
+                          <span key={`fp${i}`} className="h-2 w-2 rounded-xs border border-detect/70" />
                         ))}
                       </div>
                     </button>
@@ -157,16 +156,16 @@ function ChannelMap({ channels, runs, exp }: { channels: Channel[]; runs: RunSum
           </div>
         ))}
       </div>
-      <div className="w-[220px] space-y-3 text-[12px] text-ink-2">
+      <div className="w-56 space-y-3 text-xs text-ink-2">
         <div className="eyebrow">Reading the map</div>
         <div className="flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-[2px] bg-detect" /> Labelled sequence overlapped by a model detection
+          <span className="h-2.5 w-2.5 rounded-xs bg-detect" /> Labelled sequence overlapped by a model detection
         </div>
         <div className="flex items-center gap-2">
-          <span className="hatch-label h-2.5 w-2.5 rounded-[2px] border border-label/60" /> Labelled sequence not detected
+          <span className="hatch-label h-2.5 w-2.5 rounded-xs border border-label/60" /> Labelled sequence not detected
         </div>
         <div className="flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-[2px] border border-detect/70" /> Detection with no label overlap (max 6 shown)
+          <span className="h-2.5 w-2.5 rounded-xs border border-detect/70" /> Detection with no label overlap (max 6 shown)
         </div>
         <p className="pt-2 text-muted">
           Source: {exp ? <Link className="text-accent hover:underline" to={`/experiments/${exp.id}`}>{exp.name}</Link> : "—"}. Click a channel to open it in
@@ -216,7 +215,7 @@ export default function Overview() {
           <Stat
             label="Dataset"
             mono={false}
-            value={<span className="text-[17px]">{o.dataset.available ? (o.dataset.validation_ok ? "Validated" : "Issues") : "Missing"}</span>}
+            value={<span className="text-lg">{o.dataset.available ? (o.dataset.validation_ok ? "Validated" : "Issues") : "Missing"}</span>}
             sub={o.dataset.source ? `via ${o.dataset.source.replace("_", " ")}` : undefined}
           />
           <Stat label="Channels analysed" value={`${o.channels_analysed}/${(o.spacecraft.SMAP?.channels ?? 0) + (o.spacecraft.MSL?.channels ?? 0)}`} />
@@ -230,7 +229,7 @@ export default function Overview() {
       <Panel
         eyebrow="Model evaluation summary"
         title="Latest all-channel result per method"
-        actions={<Link to="/evaluation" className="inline-flex items-center gap-1 text-[12.5px] text-accent hover:underline">Full evaluation <ArrowRight size={13} /></Link>}
+        actions={<Link to="/evaluation" className="inline-flex items-center gap-1 text-sm text-accent hover:underline">Full evaluation <ArrowRight size={14} /></Link>}
       >
         {o.leaderboard.length ? (
           <Leaderboard rows={o.leaderboard} />
@@ -247,17 +246,17 @@ export default function Overview() {
         </Panel>
       )}
 
-      <Panel eyebrow="Recent experiments" title="Latest activity" actions={<Link to="/experiments" className="text-[12.5px] text-accent hover:underline">All experiments</Link>}>
+      <Panel eyebrow="Recent experiments" title="Latest activity" actions={<Link to="/experiments" className="text-sm text-accent hover:underline">All experiments</Link>}>
         {o.recent_experiments.length ? (
           <div className="divide-y divide-hairline">
             {o.recent_experiments.map((e) => (
               <Link key={e.id} to={`/experiments/${e.id}`} className="flex items-center justify-between gap-4 py-2.5 hover:bg-raised/40">
                 <div className="flex min-w-0 items-center gap-3">
                   <span className="h-2.5 w-2.5 shrink-0 rounded-sm" style={{ background: METHOD_COLOR[e.method] }} />
-                  <span className="truncate text-[13px] text-ink">{e.name}</span>
+                  <span className="truncate text-sm text-ink">{e.name}</span>
                   <OriginTag origin={e.origin} />
                 </div>
-                <div className="flex shrink-0 items-center gap-5 text-[12px] text-muted">
+                <div className="flex shrink-0 items-center gap-5 text-xs text-muted">
                   <span className="num">F0.5 {fmtNum(e.headline.event_f0_5, 3)}</span>
                   <span className="num hidden md:inline">{fmtDuration(e.train_time_s)}</span>
                   <span className="hidden md:inline">{fmtDate(e.created_at)}</span>

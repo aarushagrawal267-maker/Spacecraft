@@ -41,8 +41,8 @@ function ContextBar() {
   const queued = (exps.data ?? []).filter((e) => e.status === "queued").length;
   const backendDown = ds.isError;
   return (
-    <div className="flex h-12 items-center justify-between gap-4 border-b border-hairline bg-void/80 px-6 backdrop-blur">
-      <div className="flex min-w-0 items-center gap-5 text-[12px]">
+    <div className="flex h-12 items-center justify-between gap-4 border-b border-hairline bg-void/80 px-4 backdrop-blur md:px-6">
+      <div className="flex min-w-0 items-center gap-5 text-xs">
         <span className="inline-flex items-center gap-2 text-ink-2">
           <span
             className={`h-1.5 w-1.5 rounded-full ${backendDown ? "bg-critical" : ds.data?.available ? "bg-good" : "bg-warn"}`}
@@ -57,7 +57,7 @@ function ContextBar() {
           </span>
         )}
       </div>
-      <div className="flex items-center gap-5 text-[12px] text-muted">
+      <div className="flex items-center gap-5 text-xs text-muted">
         {(running > 0 || queued > 0) && (
           <NavLink to="/experiments" className="inline-flex items-center gap-1.5 text-accent hover:underline">
             <span className="pulse-dot h-1.5 w-1.5 rounded-full bg-accent" />
@@ -65,12 +65,12 @@ function ContextBar() {
           </NavLink>
         )}
         {sys.data && (
-          <span className="inline-flex items-center gap-1.5" title={sys.data.platform}>
+          <span className="hidden sm:inline-flex items-center gap-1.5" title={sys.data.platform}>
             <Cpu size={13} />
             {sys.data.cuda_available ? `CUDA · ${sys.data.cuda_device}` : `CPU · ${sys.data.cpu_count} cores`}
           </span>
         )}
-        <span className="hidden rounded border border-hairline px-2 py-0.5 text-[11px] lg:inline" title="Independent research implementation — not affiliated with NASA/JPL">
+        <span className="hidden rounded border border-hairline px-2 py-0.5 text-xs lg:inline" title="Independent research implementation — not affiliated with NASA/JPL">
           Independent research · benchmark data
         </span>
       </div>
@@ -81,21 +81,22 @@ function ContextBar() {
 export function Shell({ children }: { children: ReactNode }) {
   return (
     <div className="flex h-full">
-      <aside className="flex w-[232px] shrink-0 flex-col border-r border-hairline bg-panel">
-        <div className="px-5 pt-5 pb-6">
+      <aside className="flex w-14 shrink-0 md:w-60 flex-col border-r border-hairline bg-panel">
+        <div className="px-3.5 pt-5 pb-8 md:px-5">
           <Wordmark />
         </div>
-        <nav className="flex-1 overflow-y-auto px-3" aria-label="Main">
+        <nav className="flex-1 overflow-y-auto px-2 md:px-3" aria-label="Main">
           {NAV.map((g) => (
-            <div key={g.group} className="mb-5">
-              <div className="eyebrow mb-1.5 px-2.5 text-dim">{g.group}</div>
+            <div key={g.group} className="mb-6">
+              <div className="eyebrow mb-2 hidden px-2.5 md:block">{g.group}</div>
               {g.items.map((it) => (
                 <NavLink
                   key={it.to}
                   to={it.to}
                   end={it.end}
+                  title={it.label}
                   className={({ isActive }) =>
-                    `group relative flex items-center gap-2.5 rounded-md px-2.5 py-[7px] text-[13px] transition-colors ${
+                    `group relative flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors ${
                       isActive ? "bg-raised text-ink" : "text-ink-2 hover:bg-raised/60 hover:text-ink"
                     }`
                   }
@@ -103,8 +104,8 @@ export function Shell({ children }: { children: ReactNode }) {
                   {({ isActive }) => (
                     <>
                       {isActive && <span className="absolute top-1.5 bottom-1.5 left-0 w-[2px] rounded bg-accent" />}
-                      <it.icon size={15} className={isActive ? "text-accent" : "text-muted group-hover:text-ink-2"} />
-                      {it.label}
+                      <it.icon size={16} strokeWidth={1.5} className={isActive ? "text-accent" : "text-muted group-hover:text-ink-2"} />
+                      <span className="sr-only md:not-sr-only">{it.label}</span>
                     </>
                   )}
                 </NavLink>
@@ -112,7 +113,7 @@ export function Shell({ children }: { children: ReactNode }) {
             </div>
           ))}
         </nav>
-        <div className="border-t border-hairline px-5 py-4 text-[11px] leading-relaxed text-dim">
+        <div className="hidden border-t border-hairline px-5 py-4 md:block text-xs leading-relaxed text-muted">
           Inspired by Hundman et al., KDD 2018. Not affiliated with NASA/JPL. Anomalies are patterns that warrant investigation, not
           confirmed failures.
         </div>
@@ -120,7 +121,7 @@ export function Shell({ children }: { children: ReactNode }) {
       <div className="flex min-w-0 flex-1 flex-col">
         <ContextBar />
         <main className="graticule flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-[1440px] px-8 py-7">{children}</div>
+          <div className="mx-auto max-w-[1440px] px-4 py-8 md:px-8">{children}</div>
         </main>
       </div>
     </div>

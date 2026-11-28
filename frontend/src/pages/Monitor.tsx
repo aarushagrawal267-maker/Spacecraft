@@ -153,7 +153,7 @@ export default function Monitor() {
         newly revealed point, the score is smoothed incrementally, and each threshold window is evaluated as soon as it is complete.
       </PageHeader>
 
-      <div className="flex items-center gap-3 rounded-lg border border-[#5c4a1a] bg-[#171308] px-4 py-2.5 text-[13px] text-[#e8cf8f]" role="note">
+      <div className="flex items-center gap-3 rounded-lg border border-warn/30 bg-warn/5 px-4 py-3 text-sm text-ink-2" role="note">
         <RadioTower size={15} />
         <span>
           <strong>Historical replay.</strong> This is recorded benchmark telemetry played back for analysis — not a live connection to an
@@ -170,11 +170,11 @@ export default function Monitor() {
           <Panel>
             <div className="flex flex-wrap items-end gap-x-6 gap-y-4 pt-4">
               <div>
-                <div className="eyebrow mb-1.5">Model</div>
+                <div className="eyebrow mb-2">Model</div>
                 <RunPicker chan={chan} runId={runId} onChange={setRunId} requireModel />
               </div>
               <div>
-                <div className="eyebrow mb-1.5">Playback speed</div>
+                <div className="eyebrow mb-2">Playback speed</div>
                 <Segmented ariaLabel="Playback speed" value={speed} onChange={setSpeed} options={SPEEDS} />
               </div>
               <div className="ml-auto flex items-center gap-2">
@@ -205,7 +205,7 @@ export default function Monitor() {
                 <div className="h-1.5 overflow-hidden rounded bg-sunken" role="progressbar" aria-valuenow={cursor} aria-valuemax={session.n}>
                   <div className="h-full bg-accent/70 transition-[width]" style={{ width: `${(100 * cursor) / session.n}%` }} />
                 </div>
-                <div className="num mt-1.5 flex justify-between text-[11.5px] text-muted">
+                <div className="num mt-1.5 flex justify-between text-xs text-muted">
                   <span>revealed {fmtInt(cursor)} / {fmtInt(session.n)}</span>
                   <span>verdicts issued up to index {fmtInt(verdictTo)}{computeMs != null ? ` · last step ${fmtNum(computeMs, 0)} ms server compute` : ""}</span>
                 </div>
@@ -244,14 +244,14 @@ export default function Monitor() {
                   />
                 </>
               ) : (
-                <div className="flex h-[300px] items-center justify-center text-[13px] text-muted">The stream appears here once monitoring starts.</div>
+                <div className="flex h-[300px] items-center justify-center text-sm text-muted">The stream appears here once monitoring starts.</div>
               )}
             </Panel>
             <div className="space-y-6">
               <Panel eyebrow="Current reading" title={last != null ? `Index ${fmtInt(last)}` : "—"}>
                 <div
-                  className={`mb-3 flex items-center gap-2 rounded-md border px-3 py-2 text-[13px] ${
-                    flaggedNow ? "border-detect/60 bg-[#151233] text-ink" : "border-hairline bg-sunken text-ink-2"
+                  className={`mb-3 flex items-center gap-2 rounded-md border px-3 py-2 text-sm ${
+                    flaggedNow ? "border-detect/60 bg-detect/10 text-ink" : "border-hairline bg-sunken text-ink-2"
                   }`}
                   role="status"
                 >
@@ -264,7 +264,7 @@ export default function Monitor() {
                 <KV k="Latest threshold" v={fmtNum(latestThr, 4)} />
                 <KV k="Intervals flagged" v={intervals.length} />
                 <KV k="Threshold window" v={session ? `${session.window_batches ?? "—"} × ${session.batch_size ?? "—"} pts` : "—"} />
-                <p className="mt-3 text-[11.5px] leading-relaxed text-dim">
+                <p className="mt-3 text-xs leading-relaxed text-dim">
                   {session && session.window_batches && session.batch_size
                     ? `The first verdict needs one full threshold window (${session.window_batches} × ${session.batch_size} = ${fmtInt(session.window_batches * session.batch_size)} scored points, i.e. up to index ${fmtInt(session.eval_start + session.window_batches * session.batch_size)}). After that a window is evaluated every ${session.batch_size} new points, so verdicts lag the newest reading by up to one batch.`
                     : "Verdicts are issued once each threshold window is complete."}{" "}
@@ -272,7 +272,7 @@ export default function Monitor() {
                 </p>
               </Panel>
               <Panel eyebrow="Event log" title="Model flags">
-                <div className="max-h-[260px] space-y-2 overflow-y-auto pr-1 text-[12.5px]">
+                <div className="max-h-[260px] space-y-2 overflow-y-auto pr-1 text-sm">
                   {log.length ? (
                     log.map((e, i) => (
                       <div key={i} className={`flex gap-2 ${e.kind === "flag" ? "text-ink" : "text-muted"}`}>

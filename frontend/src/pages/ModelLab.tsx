@@ -52,7 +52,7 @@ export function useEpochStream(expId: number | null, active: boolean) {
 }
 
 export function LossChart({ epochs, height = 260 }: { epochs: EpochLog[]; height?: number }) {
-  if (!epochs.length) return <div className="flex items-center justify-center text-[13px] text-muted" style={{ height }}>Waiting for the first epoch…</div>;
+  if (!epochs.length) return <div className="flex items-center justify-center text-sm text-muted" style={{ height }}>Waiting for the first epoch…</div>;
   const x = epochs.map((e) => e.epoch);
   const hasVal = epochs.some((e) => e.val_loss != null);
   const last = epochs[epochs.length - 1];
@@ -180,10 +180,10 @@ export default function ModelLab() {
                 <option key={m.key} value={m.key}>{m.label}</option>
               ))}
             </Select>
-            <p className="mt-2 text-[12.5px] leading-relaxed text-muted">{spec?.purpose}</p>
+            <p className="mt-2 text-sm leading-relaxed text-muted">{spec?.purpose}</p>
             {spec && Object.keys(spec.profiles).length > 0 && (
               <div className="mt-4">
-                <div className="eyebrow mb-1.5">Profile</div>
+                <div className="eyebrow mb-2">Profile</div>
                 <Segmented ariaLabel="Profile" value={profile} onChange={setProfile} options={Object.keys(spec.profiles).map((p) => ({ value: p, label: p[0].toUpperCase() + p.slice(1) }))} />
               </div>
             )}
@@ -191,25 +191,25 @@ export default function ModelLab() {
 
           <Panel eyebrow="2 · Parameters" title="Hyper-parameters">
             {Object.keys(cfg).length === 0 ? (
-              <p className="text-[12.5px] text-muted">This method has no trainable parameters.</p>
+              <p className="text-sm text-muted">This method has no trainable parameters.</p>
             ) : (
               <div className="grid grid-cols-2 gap-x-4 gap-y-3">
                 {Object.entries(cfg).map(([k, v]) => (
                   <label key={k} className="block" title={PARAM_HELP[k]}>
-                    <div className="mb-1 text-[11.5px] text-muted">{k}</div>
+                    <div className="mb-1 text-xs text-muted">{k}</div>
                     <input
                       type="number"
                       step={k === "lr" || k === "min_delta" ? "any" : k === "dropout" || k === "val_fraction" ? 0.05 : 1}
                       value={v}
                       onChange={(e) => setCfg((c) => ({ ...c, [k]: Number(e.target.value) }))}
-                      className="num h-8 w-full rounded-md border border-edge bg-raised px-2 text-[12.5px] text-ink"
+                      className="num h-8 w-full rounded-md border border-edge bg-raised px-2 text-sm text-ink"
                     />
                   </label>
                 ))}
               </div>
             )}
             <div className="mt-4">
-              <div className="eyebrow mb-1.5">Thresholding</div>
+              <div className="eyebrow mb-2">Thresholding</div>
               <Segmented ariaLabel="Threshold" value={thrMode} onChange={setThrMode} options={[{ value: "ndt", label: "Dynamic (NDT)" }, { value: "static", label: "Static μ+3σ (train)" }]} />
             </div>
           </Panel>
@@ -234,7 +234,7 @@ export default function ModelLab() {
                     const on = list.includes(c.chan_id);
                     return (
                       <button key={c.chan_id} onClick={() => setList((l) => (on ? l.filter((x) => x !== c.chan_id) : [...l, c.chan_id]))}
-                        className={`num rounded border px-1.5 py-0.5 text-[11.5px] ${on ? "border-accent/70 bg-[#0d2030] text-ink" : "border-hairline text-muted hover:text-ink"}`}>
+                        className={`num rounded border px-1.5 py-0.5 text-xs ${on ? "border-accent/70 bg-accent/10 text-ink" : "border-hairline text-muted hover:text-ink"}`}>
                         {c.chan_id}
                       </button>
                     );
@@ -243,12 +243,12 @@ export default function ModelLab() {
               )}
             </div>
             <div className="mt-4 grid grid-cols-3 gap-3">
-              <label><div className="mb-1 text-[11.5px] text-muted">Worker processes</div>
-                <input type="number" min={1} max={sys.data?.cpu_count ?? 8} value={workers} onChange={(e) => setWorkers(Number(e.target.value))} className="num h-8 w-full rounded-md border border-edge bg-raised px-2 text-[12.5px]" /></label>
-              <label><div className="mb-1 text-[11.5px] text-muted">Seed</div>
-                <input type="number" value={seed} onChange={(e) => setSeed(Number(e.target.value))} className="num h-8 w-full rounded-md border border-edge bg-raised px-2 text-[12.5px]" /></label>
-              <label><div className="mb-1 text-[11.5px] text-muted">Name (optional)</div>
-                <input value={name} onChange={(e) => setName(e.target.value)} className="h-8 w-full rounded-md border border-edge bg-raised px-2 text-[12.5px]" /></label>
+              <label><div className="mb-1 text-xs text-muted">Worker processes</div>
+                <input type="number" min={1} max={sys.data?.cpu_count ?? 8} value={workers} onChange={(e) => setWorkers(Number(e.target.value))} className="num h-8 w-full rounded-md border border-edge bg-raised px-2 text-sm" /></label>
+              <label><div className="mb-1 text-xs text-muted">Seed</div>
+                <input type="number" value={seed} onChange={(e) => setSeed(Number(e.target.value))} className="num h-8 w-full rounded-md border border-edge bg-raised px-2 text-sm" /></label>
+              <label><div className="mb-1 text-xs text-muted">Name (optional)</div>
+                <input value={name} onChange={(e) => setName(e.target.value)} className="h-8 w-full rounded-md border border-edge bg-raised px-2 text-sm" /></label>
             </div>
             {heavy && (
               <div className="mt-4"><Notice tone="warn">Training an LSTM on {selectedChannels.length} channels can take a long time on a laptop CPU (minutes per channel). Consider the Quick profile or fewer channels first.</Notice></div>
@@ -264,7 +264,7 @@ export default function ModelLab() {
               <KV k="RAM available / total" v={sys.data.ram_total_gb ? `${sys.data.ram_available_gb} / ${sys.data.ram_total_gb} GB` : "—"} />
               <KV k="PyTorch" v={sys.data.torch} />
               <KV k="Device preference" v={sys.data.device_preference} />
-              <p className="mt-2 text-[12px] text-muted">{sys.data.recommendation}</p>
+              <p className="mt-2 text-xs text-muted">{sys.data.recommendation}</p>
             </Panel>
           )}
         </div>
@@ -284,12 +284,12 @@ export default function ModelLab() {
                   <div className="flex items-center gap-3">
                     <StatusBadge status={watched.data.status} />
                     {active && <Button size="sm" variant="danger" onClick={() => cancel.mutate(watched.data!.id)} loading={cancel.isPending}><Square size={12} /> Cancel</Button>}
-                    <Link to={`/experiments/${watched.data.id}`} className="text-[12.5px] text-accent hover:underline">Details</Link>
+                    <Link to={`/experiments/${watched.data.id}`} className="text-sm text-accent hover:underline">Details</Link>
                   </div>
                 }
               >
                 <div className="h-1.5 overflow-hidden rounded bg-sunken"><div className="h-full rounded bg-accent/70 transition-[width]" style={{ width: `${watched.data.progress * 100}%` }} /></div>
-                <div className="num mt-1.5 flex justify-between text-[11.5px] text-muted">
+                <div className="num mt-1.5 flex justify-between text-xs text-muted">
                   <span>{runs.filter((r) => ["completed", "failed", "cancelled"].includes(r.status)).length} / {watched.data.n_channels} channels finished</span>
                   <span>{watched.data.device ?? "—"} · {watched.data.current_channel ? `training ${watched.data.current_channel}` : watched.data.status}</span>
                 </div>
@@ -300,17 +300,17 @@ export default function ModelLab() {
                     {["lstm_forecaster", "lstm_autoencoder"].includes(watched.data.method) ? (
                       <LossChart epochs={epochs} />
                     ) : (
-                      <p className="text-[13px] text-muted">This method has no iterative training, so there is no loss curve.</p>
+                      <p className="text-sm text-muted">This method has no iterative training, so there is no loss curve.</p>
                     )}
                   </div>
                   <div className="max-h-[320px] overflow-y-auto">
                     <div className="eyebrow mb-2">Channels</div>
                     {runs.map((r) => (
                       <button key={r.id} onClick={() => setViewChan(r.chan_id)}
-                        className={`flex w-full items-center justify-between rounded px-2 py-1 text-left text-[12.5px] ${r.chan_id === shownChan ? "bg-raised" : "hover:bg-raised/50"}`}>
+                        className={`flex w-full items-center justify-between rounded px-2 py-1 text-left text-sm ${r.chan_id === shownChan ? "bg-raised" : "hover:bg-raised/50"}`}>
                         <span className="num">{r.chan_id}</span>
                         <span className="flex items-center gap-2">
-                          {r.event.f0_5 != null && <span className="num text-[11px] text-muted">F0.5 {fmtNum(r.event.f0_5, 2)}</span>}
+                          {r.event.f0_5 != null && <span className="num text-xs text-muted">F0.5 {fmtNum(r.event.f0_5, 2)}</span>}
                           <StatusBadge status={r.status} />
                         </span>
                       </button>
@@ -338,16 +338,16 @@ export default function ModelLab() {
 
           <Panel eyebrow="Queue" title="Recent local experiments">
             {(exps.data ?? []).filter((e) => e.origin === "local").length === 0 ? (
-              <p className="text-[13px] text-muted">None yet.</p>
+              <p className="text-sm text-muted">None yet.</p>
             ) : (
               <div className="divide-y divide-hairline">
                 {(exps.data ?? []).filter((e) => e.origin === "local").slice(0, 8).map((e) => (
                   <button key={e.id} onClick={() => { setWatchId(e.id); setViewChan(null); }} className={`flex w-full items-center justify-between gap-3 py-2 text-left ${e.id === watchId ? "text-ink" : "text-ink-2"}`}>
                     <span className="flex min-w-0 items-center gap-2">
                       <span className="h-2 w-2 shrink-0 rounded-sm" style={{ background: METHOD_COLOR[e.method] }} />
-                      <span className="truncate text-[13px]">#{e.id} {e.name}</span>
+                      <span className="truncate text-sm">#{e.id} {e.name}</span>
                     </span>
-                    <span className="flex shrink-0 items-center gap-3 text-[12px] text-muted">
+                    <span className="flex shrink-0 items-center gap-3 text-xs text-muted">
                       <span className="num">{fmtInt(e.n_channels)} ch</span>
                       <StatusBadge status={e.status} />
                     </span>

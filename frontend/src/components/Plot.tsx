@@ -5,7 +5,7 @@ import { C } from "../lib/palette";
 
 const PlotlyComponent = createPlotlyComponent(Plotly);
 
-export const FONT = { family: "IBM Plex Sans, system-ui, sans-serif", size: 11.5, color: C.muted };
+export const FONT = { family: "IBM Plex Sans, system-ui, sans-serif", size: 12, color: C.muted };
 
 export function baseLayout(over: Partial<Layout> = {}): Partial<Layout> {
   return {
@@ -14,9 +14,9 @@ export function baseLayout(over: Partial<Layout> = {}): Partial<Layout> {
     font: FONT,
     margin: { l: 52, r: 16, t: 8, b: 36 },
     hoverlabel: {
-      bgcolor: "#0f1629",
-      bordercolor: "#263152",
-      font: { family: "IBM Plex Mono, monospace", size: 11.5, color: C.ink },
+      bgcolor: C.raised,
+      bordercolor: C.axis,
+      font: { family: "IBM Plex Mono, monospace", size: 12, color: C.ink },
       align: "left",
     },
     showlegend: false,
@@ -37,8 +37,8 @@ export function axis(over: Record<string, unknown> = {}): Partial<LayoutAxis> {
     ticks: "outside",
     ticklen: 3,
     tickcolor: C.axis,
-    tickfont: { family: "IBM Plex Mono, monospace", size: 10.5, color: C.muted },
-    title: { font: { size: 11.5, color: C.muted }, standoff: 8 },
+    tickfont: { family: "IBM Plex Mono, monospace", size: 11, color: C.muted },
+    title: { font: { size: 12, color: C.muted }, standoff: 8 },
     ...over,
   } as Partial<LayoutAxis>;
 }

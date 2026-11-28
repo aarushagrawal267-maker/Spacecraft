@@ -86,9 +86,9 @@ export default function ExperimentDetail() {
       <div className="grid gap-6 xl:grid-cols-[1fr_440px]">
         <Panel eyebrow="Channel runs" title={`${e.runs?.length ?? 0} channels`} pad={false}>
           <div className="max-h-[520px] overflow-auto">
-            <table className="w-full text-[12.5px]">
+            <table className="w-full text-sm">
               <thead className="sticky top-0 bg-panel">
-                <tr className="text-left text-[11px] text-muted">
+                <tr className="text-left text-xs text-muted">
                   {["Channel", "Status", "Epochs", "Best val", "TP/FP/FN", "Event F1", "Point F1", "AP", "Train", ""].map((h) => <th key={h} className="px-3 py-2 font-medium first:pl-5">{h}</th>)}
                 </tr>
               </thead>
@@ -113,7 +113,7 @@ export default function ExperimentDetail() {
         </Panel>
         <Panel eyebrow={run.data ? `Run ${run.data.chan_id}` : "Run"} title={run.data ? (trainable ? "Training history" : "Run details") : "Select a channel run"}>
           {!runId ? (
-            <p className="text-[13px] text-muted">Click a row to see its loss curves and detections.</p>
+            <p className="text-sm text-muted">Click a row to see its loss curves and detections.</p>
           ) : !run.data ? (
             <Loading height={260} />
           ) : (
