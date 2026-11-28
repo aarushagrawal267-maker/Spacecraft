@@ -51,3 +51,6 @@ logs/
 Thumbs.db
 .vscode/
 .idea/
+
+# Browser demo build output (deploy/browser/build.py)
+build/

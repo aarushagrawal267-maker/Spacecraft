@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Heliograph · browser demo</title>
+  <meta name="description" content="Viewer of the Heliograph reference results: LSTM and baseline anomaly detection on NASA SMAP and MSL telemetry.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="viewer.css">
+  <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js" defer></script>
+  <script src="viewer.js" defer></script>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <img src="favicon.svg" alt="" width="28" height="28">
+    <div>
+      <h1>Heliograph</h1>
+      <p>Spacecraft telemetry anomaly detection · NASA SMAP &amp; MSL (Curiosity)</p>
+    </div>
+  </div>
+</header>
+<div class="banner" role="note">
+  <strong>Browser demo &mdash; the full app runs locally.</strong>
+  This page is a viewer of the stored reference results: seven detection methods run on all 81 channels of the
+  SMAP/MSL benchmark. Nothing is trained or computed here. Training, live inference, the telemetry replay and the
+  model laboratory are part of the full app (<a href="https://github.com/aarushagrawal267-maker/spacecraft" target="_blank" rel="noopener">source and setup</a>).
+</div>
+
+<main>
+  <section class="panel" aria-labelledby="results-h">
+    <div class="panel-head">
+      <h2 id="results-h">Benchmark results</h2>
+      <div class="seg" role="tablist" aria-label="Spacecraft" id="sc-filter">
+        <button type="button" role="tab" data-sc="overall" aria-selected="true">All</button>
+        <button type="button" role="tab" data-sc="SMAP" aria-selected="false">SMAP</button>
+        <button type="button" role="tab" data-sc="MSL" aria-selected="false">MSL</button>
+      </div>
+    </div>
+    <p class="hint">Event-wise scores count each expert-labelled anomaly sequence once: a label is found when a detected
+      interval overlaps it, and a detected interval that overlaps no label is a false alarm. F0.5 weights precision
+      more than recall, as in Hundman et al. (fewer false alarms for operators). Point-wise F1 scores every
+      timestep. Mean AP is the average precision of the anomaly scores, averaged over channels.</p>
+    <div class="table-wrap"><table id="results-table"></table></div>
+    <p class="hint" id="results-note"></p>
+  </section>
+
+  <section class="panel" aria-labelledby="inspect-h">
+    <div class="panel-head"><h2 id="inspect-h">Inspect a channel</h2></div>
+    <div class="controls">
+      <label>Channel <select id="chan"></select></label>
+      <label>Method <select id="method"></select></label>
+    </div>
+    <p id="chan-status" class="hint" role="status"></p>
+    <div id="cards" class="cards"></div>
+    <div id="plot" class="plot" aria-label="Telemetry, model output and anomaly scores"></div>
+    <div class="legend" id="legend">
+      <span><i class="sw actual"></i>telemetry</span>
+      <span id="legend-pred"><i class="sw prediction"></i>model forecast</span>
+      <span><i class="sw smoothed"></i>smoothed error / score</span>
+      <span><i class="sw threshold"></i>dynamic thresholds (dotted: lower)</span>
+      <span><i class="sw label"></i>expert-labelled anomaly</span>
+      <span><i class="sw detect"></i>detected interval</span>
+    </div>
+    <div class="two">
+      <div><h3>Expert-labelled anomalies</h3><ul id="labels" class="list"></ul></div>
+      <div><h3>Detected intervals</h3><ul id="dets" class="list"></ul></div>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="about-h">
+    <div class="panel-head"><h2 id="about-h">About this demo</h2></div>
+    <ul class="notes">
+      <li>The model outputs, thresholds, detected intervals and metrics are the stored reference results in the
+        repository's <code>reference/</code> folder, produced by the full app (LSTM: standard profile, 64 units,
+        at most 20 epochs, on CPU). Labels are the official Telemanom expert labels (channel P-2 has two overlapping
+        rows, which are merged).</li>
+      <li>The telemetry is not stored with this page. When you open a channel, its test stream is downloaded from
+        the public GitHub copy of the benchmark (TranAD repository, pinned commit), the same source the full app's
+        setup uses. Telemetry values are the benchmark's pre-scaled values.</li>
+      <li>Independent research implementation inspired by Hundman et al., <em>Detecting Spacecraft Anomalies Using
+        LSTMs and Nonparametric Dynamic Thresholding</em> (KDD 2018). Not affiliated with NASA, JPL or Caltech. A
+        detected anomaly is an unusual pattern that warrants investigation, not proof of a hardware failure.</li>
+    </ul>
+  </section>
+</main>
+<footer>Heliograph · MIT licence · data: Telemanom SMAP/MSL benchmark (Hundman et al., 2018)</footer>
+</body>
+</html>
