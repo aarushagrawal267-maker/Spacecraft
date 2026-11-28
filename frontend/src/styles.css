@@ -98,10 +98,15 @@ body {
 }
 
 .panel {
+  min-width: 0;
   background: var(--color-panel);
   border: 1px solid var(--color-hairline);
   border-radius: 10px;
 }
+
+/* Grid and flex children may shrink below their content; wide tables scroll inside panels. */
+.grid > * { min-width: 0; }
+.panel-body { overflow-x: auto; }
 
 .hairline-b {
   border-bottom: 1px solid var(--color-hairline);
@@ -173,3 +178,5 @@ body {
 .prose-doc table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
 .prose-doc th, .prose-doc td { border-bottom: 1px solid var(--color-hairline); padding: 6px 8px; text-align: left; color: var(--color-ink-2); }
 .prose-doc th { color: var(--color-muted); font-weight: 500; }
+
+strong, b { font-weight: 600; }

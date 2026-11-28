@@ -2,11 +2,11 @@
 // Chart chrome (ink, grid, axis, panel) follows the graphite interface ramp in styles.css.
 export const C = {
   actual: "#199e9e", // actual telemetry (teal)
-  prediction: "#dcdcdf", // model forecast — neutral ink so it never competes on hue
+  prediction: "#d9deea", // model forecast — neutral ink so it never competes on hue
   detect: "#9085e9", // model-detected anomaly
   label: "#c98500", // expert-labelled anomaly (always hatched as well)
-  raw: "#66666d",
-  smoothed: "#ededed",
+  raw: "#5e6a85",
+  smoothed: "#e6ebf5",
   threshold: "#9085e9",
   ink: "#ededed",
   ink2: "#b9b9be",

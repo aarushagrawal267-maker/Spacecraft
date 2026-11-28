@@ -32,6 +32,7 @@ function MissionCard({ sc, d }: { sc: "SMAP" | "MSL"; d?: { channels: number; te
 function Leaderboard({ rows }: { rows: Experiment[] }) {
   const sorted = [...rows].sort((a, b) => METHOD_ORDER.indexOf(a.method) - METHOD_ORDER.indexOf(b.method));
   const chartRows = sorted.filter((r) => r.headline.event_f0_5 != null);
+  const narrow = typeof window !== "undefined" && window.innerWidth < 640;
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
       <div className="overflow-x-auto">
@@ -73,7 +74,7 @@ function Leaderboard({ rows }: { rows: Experiment[] }) {
         <p className="mt-3 text-xs leading-relaxed text-muted">
           Event-wise metrics follow the protocol of Hundman et al.; point-wise F1 counts every evaluated timestep without point
           adjustment. Values are computed by this application on test indices ≥ 250 of all 81 channels and are{" "}
-          <em>not</em> directly comparable with the paper (different preprocessing details and implementation).
+          not directly comparable with the paper (different preprocessing details and implementation).
         </p>
       </div>
       <div>
@@ -95,9 +96,9 @@ function Leaderboard({ rows }: { rows: Experiment[] }) {
             },
           ]}
           layout={baseLayout({
-            margin: { l: 160, r: 40, t: 4, b: 28 },
-            xaxis: axis({ range: [0, 1], dtick: 0.25 }),
-            yaxis: axis({ autorange: "reversed", showline: false, ticks: "", ticksuffix: "   ", tickfont: { size: 12, color: C.ink2, family: "IBM Plex Sans" } }),
+            margin: { l: narrow ? 120 : 160, r: 40, t: 4, b: 28 },
+            xaxis: axis({ range: [0, 1], dtick: narrow ? 0.5 : 0.25 }),
+            yaxis: axis({ autorange: "reversed", showline: false, ticks: "", ticksuffix: "  ", tickfont: { size: narrow ? 11 : 12, color: C.ink2, family: "IBM Plex Sans" } }),
           })}
         />
       </div>

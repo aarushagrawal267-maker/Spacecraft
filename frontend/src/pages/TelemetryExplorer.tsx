@@ -193,6 +193,7 @@ export default function TelemetryExplorer() {
                       <td className="num py-1.5">{l.end}</td>
                       <td className="num py-1.5">{l.end - l.start + 1}</td>
                       <td className="py-1.5">
+                        <span className="hatch-label mr-2 inline-block h-2.5 w-2.5 rounded-sm border border-label/60 align-[-1px]" aria-hidden />
                         {l.cls}
                         {l.merged_from && l.merged_from.length > 0 && (
                           <span className="ml-2 text-xs text-warn" title={`Merged from ${JSON.stringify(l.merged_from)}`}>

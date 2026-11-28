@@ -85,7 +85,7 @@ function Detail({ id }: { id: number }) {
           ) : (
             <Notice>
               No expert label overlaps this interval. It counts as a false positive in the benchmark metrics, but unlabelled regions are not
-              guaranteed to be normal: treat it as <em>uncertain or unexplained behaviour</em> that warrants a look, not as a confirmed fault.
+              guaranteed to be normal: treat it as uncertain or unexplained behaviour that warrants a look, not as a confirmed fault.
             </Notice>
           )}
           <div className="mt-4">

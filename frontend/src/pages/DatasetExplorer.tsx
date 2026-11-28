@@ -65,8 +65,8 @@ export default function DatasetExplorer() {
 
       <Panel eyebrow="Acquisition" title={ds.data.available ? "Installed and validated" : "Not installed"}
         actions={
-          <div className="flex items-center gap-2">
-            <Select ariaLabel="Source" value={source} onChange={setSource}>
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <Select ariaLabel="Source" value={source} onChange={setSource} className="max-w-full">
               <option value="auto">Auto (Kaggle → GitHub mirror → manual)</option>
               <option value="kaggle">Kaggle</option>
               <option value="github_mirror">GitHub mirror (pinned commit)</option>
@@ -196,7 +196,7 @@ export default function DatasetExplorer() {
 
       <Panel eyebrow="Channel inventory" title={`${rows.length} channels`}
         actions={
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Segmented size="sm" ariaLabel="Spacecraft filter" value={scFilter} onChange={setScFilter} options={[{ value: "ALL", label: "All" }, { value: "SMAP", label: "SMAP" }, { value: "MSL", label: "MSL" }]} />
             <input aria-label="Search channels" placeholder="Search…" value={search} onChange={(e) => setSearch(e.target.value)} className="num h-7 w-28 rounded-md border border-edge bg-raised px-2 text-sm text-ink outline-none" />
             <Select ariaLabel="Sort" value={sortKey} onChange={(v) => setSortKey(v as typeof sortKey)} className="h-7 text-xs">

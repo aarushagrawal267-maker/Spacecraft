@@ -21,6 +21,11 @@ function ConfusionMatrix({ a }: { a: Aggregate }) {
   const p = a.point;
   const z = [[p.tp, p.fn], [p.fp, p.tn]];
   const total = p.tp + p.fn + p.fp + p.tn;
+  const logs = z.flat().map((v) => Math.log10(v + 1));
+  const lo = Math.min(...logs);
+  const hi = Math.max(...logs);
+  // Position of a cell on the colour scale (0 = darkest, 1 = brightest).
+  const pos = (v: number) => (hi > lo ? (Math.log10(v + 1) - lo) / (hi - lo) : 0);
   return (
     <Plot
       height={260}
@@ -43,7 +48,7 @@ function ConfusionMatrix({ a }: { a: Aggregate }) {
         annotations: [0, 1].flatMap((i) => [0, 1].map((j) => ({
           x: ["Flagged", "Not flagged"][j], y: ["Labelled anomaly", "Not labelled"][i],
           text: `<b>${fmtInt(z[i][j])}</b><br><span style="font-size:10px">${fmtPct(z[i][j] / total)}</span>`,
-          showarrow: false, font: { family: "IBM Plex Mono", size: 13, color: Math.log10(z[i][j] + 1) > 3.5 ? C.sunken : C.ink },
+          showarrow: false, font: { family: "IBM Plex Mono", size: 13, color: pos(z[i][j]) > 0.6 ? C.sunken : C.ink },
         }))),
       })}
     />
@@ -105,7 +110,7 @@ export default function Evaluation() {
 
       <Panel eyebrow="Experiments in comparison" title={`${list.length} selected`}
         actions={
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Segmented ariaLabel="Protocol" value={protocol} onChange={setProtocol} options={[{ value: "event", label: "Event-wise" }, { value: "point", label: "Point-wise" }]} />
             <Segmented ariaLabel="Spacecraft" value={scope} onChange={setScope} options={[{ value: "overall", label: "Both" }, { value: "SMAP", label: "SMAP" }, { value: "MSL", label: "MSL" }]} />
           </div>

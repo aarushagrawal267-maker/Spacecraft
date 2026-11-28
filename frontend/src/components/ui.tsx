@@ -20,15 +20,15 @@ export function Panel({
   return (
     <section className={`panel ${className}`}>
       {(title || actions || eyebrow) && (
-        <header className="flex items-start justify-between gap-4 px-5 pt-4 pb-3">
+        <header className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3 px-5 pt-4 pb-3">
           <div className="min-w-0">
             {eyebrow && <div className="eyebrow mb-1">{eyebrow}</div>}
             {title && <h2 className="text-lg font-medium text-ink">{title}</h2>}
           </div>
-          {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
+          {actions && <div className="flex max-w-full flex-wrap items-center gap-2">{actions}</div>}
         </header>
       )}
-      <div className={pad ? "px-5 pb-5" : ""}>{children}</div>
+      <div className={`panel-body ${pad ? "px-5 pb-5" : ""}`}>{children}</div>
     </section>
   );
 }
@@ -41,7 +41,7 @@ export function PageHeader({ eyebrow, title, children, actions }: { eyebrow: str
         <h1 className="text-3xl font-medium text-ink">{title}</h1>
         {children && <p className="mt-2 text-base leading-relaxed text-ink-2">{children}</p>}
       </div>
-      {actions && <div className="flex items-center gap-2">{actions}</div>}
+      {actions && <div className="flex max-w-full flex-wrap items-center gap-2">{actions}</div>}
     </div>
   );
 }
@@ -60,7 +60,7 @@ export function KV({ k, v, mono = true }: { k: ReactNode; v: ReactNode; mono?: b
   return (
     <div className="flex items-baseline justify-between gap-3 py-1.5 hairline-b last:border-b-0">
       <span className="text-sm text-muted">{k}</span>
-      <span className={`text-right text-sm text-ink ${mono ? "num" : ""}`}>{v}</span>
+      <span className={`shrink-0 text-right text-sm whitespace-nowrap text-ink ${mono ? "num" : ""}`}>{v}</span>
     </div>
   );
 }

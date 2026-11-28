@@ -67,7 +67,7 @@ export default function Docs() {
             windows without the vanishing-gradient problems of plain RNNs.
           </p>
           <p>
-            For each telemetry channel we train a separate LSTM on the channel's <em>training</em> split. The model sees the previous{" "}
+            For each telemetry channel we train a separate LSTM on the channel's training split. The model sees the previous{" "}
             <code>window</code> timesteps of every input feature (the telemetry value and the one-hot command inputs) and predicts the next{" "}
             <code>horizon</code> telemetry values. It is trained with mean-squared error and early stopping on a chronological validation split.
             On the test stream, the prediction for time <em>t</em> comes from the window ending at <em>t−1</em>; the absolute difference to the
@@ -134,7 +134,7 @@ export default function Docs() {
             <li>Raw scores (absolute forecast/reconstruction errors or statistical scores) are taken on test indices ≥ 250 for every method.</li>
             <li>They are smoothed with a causal EWMA, span = batch × window × 5 % = 105 points (identical to <code>pandas.ewm(adjust=True)</code>).</li>
             <li>The stream is processed in windows of 30 batches × 70 points. In each window, ε = μ + zσ is chosen from z ∈ [2.5, 12) to maximise (Δμ/μ + Δσ/σ) / (sequences² + flagged points), with at most 5 sequences and fewer than 50 % of points flagged.</li>
-            <li>The same search runs on errors reflected about the window mean, flagging unusually <em>low</em> errors.</li>
+            <li>The same search runs on errors reflected about the window mean, flagging unusually low errors.</li>
             <li>Flags must also exceed 5 % of the window's telemetry inter-percentile range and the smoothed error must exceed 0.05 (scale guard). Flags are buffered by 100 points.</li>
             <li>Pruning: flagged sequences whose peak is not at least p = 13 % above the next-highest peak (ending with the highest non-flagged error) are removed. Single points are discarded.</li>
           </ol>

@@ -267,11 +267,12 @@ export default function DetectionCentre() {
             <div className="grid gap-6 xl:grid-cols-[1.1fr_1fr]">
               <Panel eyebrow="Detected intervals" title="Model detections">
                 {s.detections.length ? (
+                  <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="text-left text-xs text-muted">
-                        <th className="py-1.5 font-medium">Start–end</th>
-                        <th className="py-1.5 text-right font-medium">Length</th>
+                        <th className="py-1.5 pr-4 font-medium">Start–end</th>
+                        <th className="py-1.5 pr-4 text-right font-medium">Length</th>
                         <th className="py-1.5 text-right font-medium">Score</th>
                         <th className="py-1.5 pl-4 font-medium">Direction</th>
                         <th className="py-1.5 font-medium">Reference</th>
@@ -281,8 +282,8 @@ export default function DetectionCentre() {
                     <tbody>
                       {s.detections.map((d) => (
                         <tr key={`${d.start}-${d.end}`} className="border-t border-hairline">
-                          <td className="num py-1.5">{d.start}–{d.end}</td>
-                          <td className="num py-1.5 text-right">{d.end - d.start + 1}</td>
+                          <td className="num whitespace-nowrap py-1.5 pr-4">{d.start}–{d.end}</td>
+                          <td className="num py-1.5 pr-4 text-right">{d.end - d.start + 1}</td>
                           <td className="num py-1.5 text-right">{fmtNum(d.score, 2)}</td>
                           <td className="py-1.5 pl-4 text-ink-2">{d.direction === "low" ? "unusually low error" : d.direction === "both" ? "high + low" : "high error"}</td>
                           <td className="py-1.5"><OutcomeTag outcome={d.outcome} /></td>
@@ -297,6 +298,7 @@ export default function DetectionCentre() {
                       ))}
                     </tbody>
                   </table>
+                  </div>
                 ) : (
                   <p className="text-sm text-muted">The model flagged no interval on this channel.</p>
                 )}
