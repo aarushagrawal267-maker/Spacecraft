@@ -29,7 +29,8 @@ class Settings(BaseSettings):
 
     # "auto" uses CUDA when torch reports it available, otherwise CPU.
     device: Literal["auto", "cpu", "cuda"] = "auto"
-    # Number of CPU threads torch may use inside a training job (None = torch default).
+    # CPU threads torch may use inside each training worker
+    # (None = min(2, CPU cores / workers), see services.jobs.default_torch_threads).
     torch_threads: int | None = None
     # Threads PyTorch may use inside the API process (live inference / replay). One thread
     # avoids severe oversubscription when training workers are busy on the same CPU.

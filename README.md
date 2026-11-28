@@ -353,7 +353,7 @@ Environment variables (all optional):
 | Variable | Default | Meaning |
 |---|---|---|
 | `HELIOGRAPH_DEVICE` | `auto` | `auto`, `cpu` or `cuda` (also `start.ps1 -Device`) |
-| `HELIOGRAPH_TORCH_THREADS` | torch default | CPU threads per training process |
+| `HELIOGRAPH_TORCH_THREADS` | min(2, CPU cores ÷ workers) | CPU threads per training process. Small LSTMs gain little from more threads, and a higher value can stall training on a busy machine |
 | `HELIOGRAPH_MAX_CONCURRENT_JOBS` | `1` | experiments running at the same time |
 | `HELIOGRAPH_DATA_DIR` / `HELIOGRAPH_DB_PATH` / `HELIOGRAPH_ARTIFACTS_DIR` | project folders | storage locations |
 | `KAGGLE_USERNAME` / `KAGGLE_KEY` | — | optional Kaggle credentials for the download |

@@ -33,6 +33,18 @@ from app.services.evaluation_service import experiment_metrics
 log = logging.getLogger("heliograph.jobs")
 
 
+# Default cap on PyTorch threads per training worker. PyTorch's own default (one thread per core)
+# oversubscribes the CPU for these small LSTMs, and on a machine that is already busy a short job can
+# stall for minutes. HELIOGRAPH_TORCH_THREADS (or an experiment's own setting) overrides this.
+DEFAULT_MAX_TORCH_THREADS = 2
+
+
+def default_torch_threads(workers: int, cpu_count: int | None = None) -> int:
+    """Threads per worker when nothing is configured: min(2, cores / workers), at least 1."""
+    cpus = cpu_count or os.cpu_count() or 1
+    return max(1, min(DEFAULT_MAX_TORCH_THREADS, cpus // max(1, workers)))
+
+
 def git_commit() -> str | None:
     try:
         out = subprocess.run(
@@ -161,9 +173,7 @@ class JobManager:
                 return
             env = dict(exp.environment or {})
             workers = max(1, min(int(env.get("workers", 1)), len(exp.channels), os.cpu_count() or 1))
-            threads = env.get("torch_threads") or settings.torch_threads
-            if threads is None and workers > 1:
-                threads = max(1, (os.cpu_count() or 1) // workers)
+            threads = env.get("torch_threads") or settings.torch_threads or default_torch_threads(workers)
             info = system_info()
             env.update({"workers": workers, "torch_threads": threads, "system": info})
             exp.environment = env
